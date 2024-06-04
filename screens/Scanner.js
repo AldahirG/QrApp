@@ -15,22 +15,10 @@ export default function Scanner() {
 
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
-    const parsedData = {
-      nombre: '...', 
-      correo: '...', 
-      telefono: '...',
-      nivel_estudios: '...',
-      conferencista: '...',
-      nombre_invito: '...',
-      fecha_registro: '...',
-      asistio: '...',
-      // ... other properties
-    };
-  
-    // Navigate to the ShowInfo screen
-    navigation.navigate('ShowInfo', { data: parsedData });
+    alert(`Qr de tipo ${type} y data ${data} escaneada!`);
+    navigation.navigate("ShowInfo", { data });
+    // Linking.openURL(data); // abre el enlace
   };
-  
 
   if (hasPermission === null) {
     return <Text>Requesting for camera permission</Text>;
