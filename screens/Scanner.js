@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, Button, Linking } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 
 export default function Scanner() {
@@ -16,7 +16,6 @@ export default function Scanner() {
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
     alert(`Qr de tipo ${type} y data ${data} escaneada!`);
-    navigation.navigate("ShowInfo", { data });
     // Linking.openURL(data); // abre el enlace
   };
 
@@ -29,12 +28,17 @@ export default function Scanner() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>DISCOVER QR CODE</Text>
+      </View>
       <BarCodeScanner
         onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-        style={StyleSheet.absoluteFillObject}
+        style={styles.qrContainer}
       />
       {scanned && (
-        <Button title={"Tap to Scan Again"} onPress={() => setScanned(false)} />
+        <TouchableOpacity style={styles.button} onPress={() => setScanned(false)}>
+          <Text style={styles.buttonText}>Tap to Scan Again</Text>
+        </TouchableOpacity>
       )}
     </View>
   );
@@ -43,7 +47,38 @@ export default function Scanner() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column",
+    backgroundColor: "#f0f0f0",
     justifyContent: "center",
+    alignItems: "center",
+  },
+  header: {
+    position: "absolute",
+    top: 60,
+    alignItems: "center",
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  qrContainer: {
+    flex: 1,
+    width: '100%',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+  button: {
+    position: "absolute",
+    bottom: 60,
+    backgroundColor: "#6200ee",
+    borderRadius: 25,
+    paddingVertical: 10,
+    paddingHorizontal: 40,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
