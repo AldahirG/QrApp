@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.greeting}>Universidad Internacional Uninter</Text>
-      <Text style={styles.header}>Generar Registro</Text>
+      <Text style={styles.header}>Registro</Text>
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -35,7 +35,7 @@ export default function Home() {
           <Text style={styles.categoryText}>Talleres</Text>
         </TouchableOpacity>
       </View>
-      <Text style={styles.subheader}>Acciones</Text>
+      <Text style={styles.subheader}>Confirmar Asistencia</Text>
       <View style={styles.courses}>
         <TouchableOpacity style={styles.course} onPress={() => navigation.navigate('Scanner')}>
           <Icon name="qr-code-scanner" size={80} color="gray" />
@@ -53,26 +53,31 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#eef',
+    backgroundColor: '#F0F8FF',
     paddingHorizontal: 20,
   },
   greeting: {
     fontSize: 20,
     marginTop: 40,
-    color: '#555',
+    color: '#333',
+    textAlign: 'center',
   },
   header: {
     fontSize: 26,
     fontWeight: 'bold',
     marginVertical: 10,
+    color: '#025FF5',
+    textAlign: 'center',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 30,
     paddingHorizontal: 10,
     marginVertical: 10,
+    borderColor: '#025FF5',
+    borderWidth: 1,
   },
   searchInput: {
     flex: 1,
@@ -103,6 +108,8 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     marginVertical: 10,
+    color: '#025FF5',
+    textAlign: 'center',
   },
   courses: {
     flexDirection: 'row',
@@ -115,10 +122,13 @@ const styles = StyleSheet.create({
     padding: 20,
     flex: 1,
     marginHorizontal: 5,
+    borderColor: '#ddd',
+    borderWidth: 1,
   },
   courseTitle: {
     marginTop: 10,
     fontSize: 18,
     textAlign: 'center',
+    color: '#333',
   },
 });

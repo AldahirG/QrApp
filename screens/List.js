@@ -18,7 +18,7 @@ export default function List() {
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
-      <Ionicons name="person-circle-outline" size={40} color="black" />
+      <Ionicons name="person-circle-outline" size={40} color="#025FF5" />
       <View style={styles.itemTextContainer}>
         <Text style={styles.itemName}>{item.name}</Text>
         <Text style={styles.itemEmail}>{item.email}</Text>
@@ -33,7 +33,7 @@ export default function List() {
         <Ionicons name="search" size={20} color="#aaa" />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search users"
+          placeholder="Buscar usuarios"
           value={search}
           onChangeText={setSearch}
         />
@@ -42,7 +42,7 @@ export default function List() {
         data={filteredUsers}
         renderItem={renderItem}
         keyExtractor={item => item.id}
-        ListEmptyComponent={<Text style={styles.noResultsText}>No users found</Text>}
+        ListEmptyComponent={<Text style={styles.noResultsText}>No se encontraron usuarios</Text>}
         style={styles.list}
       />
     </View>
@@ -52,7 +52,7 @@ export default function List() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#F0F8FF',
     paddingTop: 40,
     paddingHorizontal: 20,
   },
@@ -60,11 +60,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 30,
     paddingHorizontal: 10,
     paddingVertical: 5,
     marginBottom: 20,
-    borderColor: '#ddd',
+    borderColor: '#025FF5',
     borderWidth: 1,
   },
   searchInput: {
@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#333',
   },
   itemEmail: {
     color: '#666',
