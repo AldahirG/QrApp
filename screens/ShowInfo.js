@@ -1,9 +1,32 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 
 const ShowInfo = ({ route }) => {
   const { data } = route.params;
-  const { nombre, correo, telefono, nivel_estudios, conferencista, nombre_invito, fecha_registro, asistio } = data;
+  const [loading, setLoading] = useState(false);
+
+  const confirmAttendance = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`http://10.3.0.28:5000/api/users/${data.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ asistio: true })
+      });
+      const result = await response.json();
+      if (response.ok) {
+        Alert.alert('Asistencia confirmada');
+      } else {
+        Alert.alert('Error', result.message);
+      }
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -11,40 +34,40 @@ const ShowInfo = ({ route }) => {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Nombre:</Text>
-          <Text style={styles.text}>{nombre}</Text>
+          <Text style={styles.text}>{data.nombre}</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Correo:</Text>
-          <Text style={styles.text}>{correo}</Text>
+          <Text style={styles.text}>{data.correo}</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Teléfono:</Text>
-          <Text style={styles.text}>{telefono}</Text>
+          <Text style={styles.text}>{data.telefono}</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Nivel de Estudios:</Text>
-          <Text style={styles.text}>{nivel_estudios}</Text>
+          <Text style={styles.text}>{data.nivel_estudios}</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Conferencista:</Text>
-          <Text style={styles.text}>{conferencista}</Text>
+          <Text style={styles.text}>{data.conferencista}</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Nombre de quien invitó:</Text>
-          <Text style={styles.text}>{nombre_invito}</Text>
+          <Text style={styles.text}>{data.nombre_invito}</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Fecha de Registro:</Text>
-          <Text style={styles.text}>{fecha_registro}</Text>
+          <Text style={styles.text}>{data.fecha_registro}</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>¿Asistió?:</Text>
-          <Text style={styles.text}>{asistio}</Text>
+          <Text style={styles.text}>{data.asistio ? 'Sí' : 'No'}</Text>
         </View>
       </ScrollView>
-      <View style={styles.buttonContainer}>
-        <Text style={styles.buttonText}>Confirmar Asistencia</Text>
-      </View>
+      <TouchableOpacity style={styles.buttonContainer} onPress={confirmAttendance} disabled={loading}>
+        <Text style={styles.buttonText}>{loading ? 'Confirmando...' : 'Confirmar Asistencia'}</Text>
+      </TouchableOpacity>
     </View>
   );
 };

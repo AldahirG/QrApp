@@ -1,30 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
-const users = [
-  { id: '1', name: 'Maciej Gutkowski', email: 'maciej.gutkowski@semiflat.com' },
-  { id: '2', name: 'Marcin Grygierczyk', email: 'marcin.grygierczyk@semiflat.com' },
-  { id: '3', name: 'Massimo Blue', email: 'massimo.blue@gmail.com', guest: true },
-  // Añade más usuarios según sea necesario
-];
+import { useNavigation } from '@react-navigation/native';
 
 export default function List() {
   const [search, setSearch] = useState('');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const navigation = useNavigation();
 
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => {
+    fetchUsers();
+  }, [search]);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`http://10.3.0.28:5000/api/users?search=${search}`);
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUserPress = (user) => {
+    navigation.navigate('ShowInfo', { data: user });
+  };
 
   const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
+    <TouchableOpacity style={styles.itemContainer} onPress={() => handleUserPress(item)}>
       <Ionicons name="person-circle-outline" size={40} color="#025FF5" />
       <View style={styles.itemTextContainer}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        <Text style={styles.itemEmail}>{item.email}</Text>
+        <Text style={styles.itemName}>{item.nombre}</Text>
+        <Text style={styles.itemEmail}>{item.correo}</Text>
         {item.guest && <Text style={styles.guestBadge}>Guest</Text>}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -38,13 +52,17 @@ export default function List() {
           onChangeText={setSearch}
         />
       </View>
-      <FlatList
-        data={filteredUsers}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        ListEmptyComponent={<Text style={styles.noResultsText}>No se encontraron usuarios</Text>}
-        style={styles.list}
-      />
+      {loading ? (
+        <Text style={styles.loadingText}>Cargando...</Text>
+      ) : (
+        <FlatList
+          data={users}
+          renderItem={renderItem}
+          keyExtractor={item => item.id.toString()}
+          ListEmptyComponent={<Text style={styles.noResultsText}>No se encontraron usuarios</Text>}
+          style={styles.list}
+        />
+      )}
     </View>
   );
 }
@@ -109,6 +127,11 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   noResultsText: {
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 20,
+  },
+  loadingText: {
     textAlign: 'center',
     color: '#666',
     marginTop: 20,

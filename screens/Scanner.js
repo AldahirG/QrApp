@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, Animated, Easing } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { BarCodeScanner } from "expo-barcode-scanner";
+import { useNavigation } from '@react-navigation/native';
 
 export default function Scanner() {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [animation] = useState(new Animated.Value(0));
   const navigation = useNavigation();
-
 
   useEffect(() => {
     (async () => {
@@ -33,11 +32,7 @@ export default function Scanner() {
         useNativeDriver: true,
       }),
     ]).start(() => {
-      // Aquí podrías navegar a la vista ShowInfo y pasar los datos escaneados
-      // alert(`Qr de tipo ${type} y data ${data} escaneada!`);
-      //Navegar a la vista ShowInfo con la información escaneada
       navigation.navigate('ShowInfo', { data: JSON.parse(data) });
-      
     });
   };
 
@@ -62,7 +57,7 @@ export default function Scanner() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>ESCANEA EL CÓDIGO QR</Text>
+        <Text style={styles.headerText}>DISCOVER QR CODE</Text>
       </View>
       <Animated.View style={[styles.qrContainer, animatedStyle]}>
         <BarCodeScanner
@@ -72,7 +67,7 @@ export default function Scanner() {
       </Animated.View>
       {scanned && (
         <TouchableOpacity style={styles.button} onPress={() => setScanned(false)}>
-          <Text style={styles.buttonText}>Escanear Nuevamente</Text>
+          <Text style={styles.buttonText}>Tap to Scan Again</Text>
         </TouchableOpacity>
       )}
     </View>
