@@ -8,12 +8,12 @@ const ShowInfo = ({ route }) => {
   const confirmAttendance = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://10.3.0.28:5000/api/users/${data.id}`, {
+      const response = await fetch(`http://localhost:5000/api/registros/${data.idregistro_conferencias}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ asistio: true })
+        body: JSON.stringify({ asistio: 'SI' })
       });
       const result = await response.json();
       if (response.ok) {
@@ -34,27 +34,27 @@ const ShowInfo = ({ route }) => {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Nombre:</Text>
-          <Text style={styles.text}>{data.nombre}</Text>
+          <Text style={styles.text}>{data.Nombre}</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Correo:</Text>
-          <Text style={styles.text}>{data.correo}</Text>
+          <Text style={styles.text}>{data.Correo}</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Teléfono:</Text>
-          <Text style={styles.text}>{data.telefono}</Text>
+          <Text style={styles.text}>{data.Telefono}</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Nivel de Estudios:</Text>
-          <Text style={styles.text}>{data.nivel_estudios}</Text>
+          <Text style={styles.text}>{data.Nivel_Estudios}</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Conferencista:</Text>
-          <Text style={styles.text}>{data.conferencista}</Text>
+          <Text style={styles.text}>{data.Conferencista}</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Nombre de quien invitó:</Text>
-          <Text style={styles.text}>{data.nombre_invito}</Text>
+          <Text style={styles.text}>{data.Nombre_invito}</Text>
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>Fecha de Registro:</Text>
@@ -62,7 +62,7 @@ const ShowInfo = ({ route }) => {
         </View>
         <View style={styles.infoBox}>
           <Text style={styles.label}>¿Asistió?:</Text>
-          <Text style={styles.text}>{data.asistio ? 'Sí' : 'No'}</Text>
+          <Text style={styles.text}>{data.asistio}</Text>
         </View>
       </ScrollView>
       <TouchableOpacity style={styles.buttonContainer} onPress={confirmAttendance} disabled={loading}>

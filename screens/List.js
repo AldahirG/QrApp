@@ -16,7 +16,7 @@ export default function List() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://10.3.0.28:5000/api/users?search=${search}`);
+      const response = await fetch(`http://localhost:5000/api/registros?search=${search}`);
       const data = await response.json();
       setUsers(data);
     } catch (error) {
@@ -34,9 +34,8 @@ export default function List() {
     <TouchableOpacity style={styles.itemContainer} onPress={() => handleUserPress(item)}>
       <Ionicons name="person-circle-outline" size={40} color="#025FF5" />
       <View style={styles.itemTextContainer}>
-        <Text style={styles.itemName}>{item.nombre}</Text>
-        <Text style={styles.itemEmail}>{item.correo}</Text>
-        {item.guest && <Text style={styles.guestBadge}>Guest</Text>}
+        <Text style={styles.itemName}>{item.Nombre}</Text>
+        <Text style={styles.itemEmail}>{item.Correo}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -50,6 +49,7 @@ export default function List() {
           placeholder="Buscar usuarios"
           value={search}
           onChangeText={setSearch}
+          autoCapitalize="none"
         />
       </View>
       {loading ? (
@@ -58,7 +58,7 @@ export default function List() {
         <FlatList
           data={users}
           renderItem={renderItem}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={item => item.idregistro_conferencias.toString()}
           ListEmptyComponent={<Text style={styles.noResultsText}>No se encontraron usuarios</Text>}
           style={styles.list}
         />
@@ -115,16 +115,6 @@ const styles = StyleSheet.create({
   },
   itemEmail: {
     color: '#666',
-  },
-  guestBadge: {
-    marginTop: 5,
-    paddingVertical: 2,
-    paddingHorizontal: 4,
-    backgroundColor: '#eee',
-    color: '#555',
-    borderRadius: 3,
-    fontSize: 12,
-    alignSelf: 'flex-start',
   },
   noResultsText: {
     textAlign: 'center',
