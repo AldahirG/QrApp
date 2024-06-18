@@ -1,9 +1,21 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import moment from 'moment';
+import { useNavigation } from '@react-navigation/native';
 
 const ShowInfo = ({ route }) => {
   const { data } = route.params;
   const [loading, setLoading] = useState(false);
+  const [nombre, setNombre] = useState(data.Nombre);
+  const [correo, setCorreo] = useState(data.Correo);
+  const [telefono, setTelefono] = useState(data.Telefono);
+  const [nivelEstudios, setNivelEstudios] = useState(data.Nivel_Estudios);
+  const [conferencista, setConferencista] = useState(data.Conferencista);
+  const [nombreInvito, setNombreInvito] = useState(data.Nombre_invito);
+  const [fechaRegistro, setFechaRegistro] = useState(moment(data.fecha_registro).format('DD/MM/YYYY'));
+  const [asistio, setAsistio] = useState(data.asistio);
+  const navigation = useNavigation();
 
   const confirmAttendance = async () => {
     setLoading(true);
@@ -13,7 +25,16 @@ const ShowInfo = ({ route }) => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ asistio: 'SI' })
+        body: JSON.stringify({
+          Nombre: nombre,
+          Correo: correo,
+          Telefono: telefono,
+          Nivel_Estudios: nivelEstudios,
+          Conferencista: conferencista,
+          Nombre_invito: nombreInvito,
+          fecha_registro: moment(fechaRegistro, 'DD/MM/YYYY').toISOString(),
+          asistio: asistio
+        })
       });
       const result = await response.json();
       if (response.ok) {
@@ -29,97 +50,121 @@ const ShowInfo = ({ route }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>Información de Registro</Text>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Nombre:</Text>
-          <Text style={styles.text}>{data.Nombre}</Text>
+      <View style={styles.infoBox}>
+        <Text style={styles.label}>Nombre</Text>
+        <TextInput style={styles.input} value={nombre} onChangeText={setNombre} />
+      </View>
+      <View style={styles.infoBox}>
+        <Text style={styles.label}>Correo</Text>
+        <TextInput style={styles.input} value={correo} onChangeText={setCorreo} />
+      </View>
+      <View style={styles.infoBox}>
+        <Text style={styles.label}>Teléfono</Text>
+        <TextInput style={styles.input} value={telefono} onChangeText={setTelefono} />
+      </View>
+      <View style={styles.infoBox}>
+        <Text style={styles.label}>Nivel de Estudios</Text>
+        <TextInput style={styles.input} value={nivelEstudios} onChangeText={setNivelEstudios} />
+      </View>
+      <View style={styles.infoBox}>
+        <Text style={styles.label}>Conferencista</Text>
+        <TextInput style={styles.input} value={conferencista} onChangeText={setConferencista} />
+      </View>
+      <View style={styles.infoBox}>
+        <Text style={styles.label}>Nombre de quien invitó</Text>
+        <TextInput style={styles.input} value={nombreInvito} onChangeText={setNombreInvito} />
+      </View>
+      <View style={styles.infoBox}>
+        <Text style={styles.label}>Fecha de Registro</Text>
+        <TextInput style={styles.input} value={fechaRegistro} editable={false} />
+      </View>
+      <View style={styles.infoBox}>
+        <Text style={styles.label}>¿Asistió?</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={asistio}
+            onValueChange={(itemValue) => setAsistio(itemValue)}
+            style={styles.input}
+          >
+            <Picker.Item label="SI" value="SI" />
+            <Picker.Item label="NO" value="NO" />
+          </Picker>
         </View>
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Correo:</Text>
-          <Text style={styles.text}>{data.Correo}</Text>
-        </View>
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Teléfono:</Text>
-          <Text style={styles.text}>{data.Telefono}</Text>
-        </View>
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Nivel de Estudios:</Text>
-          <Text style={styles.text}>{data.Nivel_Estudios}</Text>
-        </View>
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Conferencista:</Text>
-          <Text style={styles.text}>{data.Conferencista}</Text>
-        </View>
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Nombre de quien invitó:</Text>
-          <Text style={styles.text}>{data.Nombre_invito}</Text>
-        </View>
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Fecha de Registro:</Text>
-          <Text style={styles.text}>{data.fecha_registro}</Text>
-        </View>
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>¿Asistió?:</Text>
-          <Text style={styles.text}>{data.asistio}</Text>
-        </View>
-      </ScrollView>
-      <TouchableOpacity style={styles.buttonContainer} onPress={confirmAttendance} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Confirmando...' : 'Confirmar Asistencia'}</Text>
-      </TouchableOpacity>
-    </View>
+      </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={confirmAttendance} disabled={loading}>
+          <Text style={styles.buttonText}>{loading ? 'Confirmando...' : 'Confirmar Asistencia'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.navigate('Home')}>
+          <Text style={styles.buttonText}>Cancelar</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#025FF5',
+    flexGrow: 1,
     padding: 20,
-    justifyContent: 'center',
+    backgroundColor: '#F0F8FF',
   },
   header: {
     fontSize: 24,
-    color: '#fff',
+    fontWeight: 'bold',
+    color: '#333',
     marginBottom: 20,
     alignSelf: 'center',
   },
-  content: {
-    alignItems: 'center',
-    paddingBottom: 20,
-  },
   infoBox: {
-    backgroundColor: '#FFF',
-    borderRadius: 10,
-    padding: 15,
-    marginVertical: 5,
-    width: '90%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
+    marginBottom: 15,
   },
   label: {
     fontSize: 16,
-    color: '#025FF5',
+    color: '#333',
     marginBottom: 5,
   },
-  text: {
-    fontSize: 18,
+  input: {
+    height: 40,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#fff',
     color: '#333',
   },
+  pickerContainer: {
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 5,
+    backgroundColor: '#fff',
+  },
   buttonContainer: {
-    backgroundColor: '#800080',
-    paddingVertical: 15,
-    borderRadius: 25,
-    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 20,
   },
+  button: {
+    flex: 1,
+    backgroundColor: '#025FF5',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#FF0000',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginLeft: 10,
+  },
   buttonText: {
-    color: '#FFF',
-    fontSize: 18,
+    color: '#fff',
+    fontSize: 16,
   },
 });
 

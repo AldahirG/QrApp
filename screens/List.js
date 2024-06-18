@@ -1,37 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-export default function List() {
+const List = () => {
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
-    fetchUsers();
-  }, [search]);
+    fetch('http://localhost:5000/api/registros')
+      .then(response => response.json())
+      .then(data => setUsers(data))
+      .catch(error => console.error(error));
+  }, []);
 
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`http://localhost:5000/api/registros?search=${search}`);
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUserPress = (user) => {
-    navigation.navigate('ShowInfo', { data: user });
-  };
+  const filteredUsers = users.filter(user => 
+    user.Nombre.toLowerCase().includes(search.toLowerCase())
+  );
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.itemContainer} onPress={() => handleUserPress(item)}>
+    <TouchableOpacity style={styles.itemContainer} onPress={() => navigation.navigate('ShowInfo', { data: item })}>
       <Ionicons name="person-circle-outline" size={40} color="#025FF5" />
       <View style={styles.itemTextContainer}>
         <Text style={styles.itemName}>{item.Nombre}</Text>
@@ -41,7 +30,7 @@ export default function List() {
   );
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} color="#aaa" />
         <TextInput
@@ -49,30 +38,23 @@ export default function List() {
           placeholder="Buscar usuarios"
           value={search}
           onChangeText={setSearch}
-          autoCapitalize="none"
         />
       </View>
-      {loading ? (
-        <Text style={styles.loadingText}>Cargando...</Text>
-      ) : (
-        <FlatList
-          data={users}
-          renderItem={renderItem}
-          keyExtractor={item => item.idregistro_conferencias.toString()}
-          ListEmptyComponent={<Text style={styles.noResultsText}>No se encontraron usuarios</Text>}
-          style={styles.list}
-        />
-      )}
-    </View>
+      <FlatList
+        data={filteredUsers}
+        renderItem={renderItem}
+        keyExtractor={item => item.idregistro_conferencias.toString()}
+        ListEmptyComponent={<Text style={styles.noResultsText}>No se encontraron usuarios</Text>}
+      />
+    </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
+    padding: 20,
     backgroundColor: '#F0F8FF',
-    paddingTop: 40,
-    paddingHorizontal: 20,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -90,9 +72,6 @@ const styles = StyleSheet.create({
     height: 40,
     marginLeft: 10,
     fontSize: 16,
-  },
-  list: {
-    flex: 1,
   },
   itemContainer: {
     flexDirection: 'row',
@@ -121,9 +100,6 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 20,
   },
-  loadingText: {
-    textAlign: 'center',
-    color: '#666',
-    marginTop: 20,
-  },
 });
+
+export default List;

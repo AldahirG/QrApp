@@ -46,6 +46,12 @@ export default function Home() {
           <Text style={styles.courseTitle}>Buscar por Nombre</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.courses}>
+        <TouchableOpacity style={styles.course} onPress={() => navigation.navigate('Assistences')}>
+          <Icon name="content-paste" size={80} color="gray" />
+          <Text style={styles.courseTitle}>Listar Asistentes</Text>
+        </TouchableOpacity>
+       </View>   
     </ScrollView>
   );
 }
