@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ScrollView } from 'react-native';
 
 const Assistences = () => {
   const [eventName, setEventName] = useState('');
@@ -84,7 +84,7 @@ const Assistences = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>Asistencias por Invitador, Programa de Interés y Confirmados</Text>
       <TextInput
         style={styles.input}
@@ -155,7 +155,7 @@ const Assistences = () => {
           )}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

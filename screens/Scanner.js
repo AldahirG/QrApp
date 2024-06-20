@@ -37,7 +37,7 @@ export default function Scanner() {
   };
 
   if (hasPermission === null) {
-    return <Text>Requesting for camera permission</Text>;
+    return <Text>Permisos de Cámara</Text>;
   }
   if (hasPermission === false) {
     return <Text>No access to camera</Text>;
@@ -57,7 +57,7 @@ export default function Scanner() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>DISCOVER QR CODE</Text>
+        <Text style={styles.headerText}>QR de ASistencia</Text>
       </View>
       <Animated.View style={[styles.qrContainer, animatedStyle]}>
         <BarCodeScanner
@@ -77,7 +77,7 @@ export default function Scanner() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#4B9CD3",
+    backgroundColor: "#F0F8FF",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#fff",
+    color: "black",
   },
   qrContainer: {
     width: 250,

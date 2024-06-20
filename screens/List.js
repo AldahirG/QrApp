@@ -15,6 +15,13 @@ const List = () => {
       .catch(error => console.error(error));
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setSearch('');
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   const filteredUsers = users.filter(user => 
     user.Nombre.toLowerCase().includes(search.toLowerCase())
   );

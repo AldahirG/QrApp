@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
+import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
 
 const ShowInfo = ({ route }) => {
@@ -38,7 +39,13 @@ const ShowInfo = ({ route }) => {
       });
       const result = await response.json();
       if (response.ok) {
-        Alert.alert('Asistencia confirmada');
+        Toast.show({
+          type: 'success',
+          text1: 'Asistencia confirmada'
+        });
+        setTimeout(() => {
+          navigation.navigate('Home');
+        }, 2000);
       } else {
         Alert.alert('Error', result.message);
       }
@@ -51,7 +58,7 @@ const ShowInfo = ({ route }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Información de Registro</Text>
+      <Text style={styles.header}>Registros</Text>
       <View style={styles.infoBox}>
         <Text style={styles.label}>Nombre</Text>
         <TextInput style={styles.input} value={nombre} onChangeText={setNombre} />
@@ -86,21 +93,20 @@ const ShowInfo = ({ route }) => {
           <Picker
             selectedValue={asistio}
             onValueChange={(itemValue) => setAsistio(itemValue)}
-            style={styles.input}
+            style={styles.picker}
           >
             <Picker.Item label="SI" value="SI" />
             <Picker.Item label="NO" value="NO" />
           </Picker>
         </View>
       </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={confirmAttendance} disabled={loading}>
-          <Text style={styles.buttonText}>{loading ? 'Confirmando...' : 'Confirmar Asistencia'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.navigate('Home')}>
-          <Text style={styles.buttonText}>Cancelar</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={confirmAttendance} disabled={loading}>
+        <Text style={styles.buttonText}>{loading ? 'Confirmando...' : 'Confirmar Asistencia'}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => navigation.navigate('Home')}>
+        <Text style={styles.buttonText}>Cancelar</Text>
+      </TouchableOpacity>
+      <Toast ref={(ref) => Toast.setRef(ref)} />
     </ScrollView>
   );
 };
@@ -141,26 +147,20 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: '#fff',
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
+  picker: {
+    height: 40,
   },
   button: {
-    flex: 1,
-    backgroundColor: '#025FF5',
+    marginTop: 20,
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
-    marginRight: 10,
+  },
+  confirmButton: {
+    backgroundColor: '#025FF5',
   },
   cancelButton: {
-    flex: 1,
     backgroundColor: '#FF0000',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginLeft: 10,
   },
   buttonText: {
     color: '#fff',

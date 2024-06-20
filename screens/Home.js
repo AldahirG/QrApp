@@ -8,34 +8,41 @@ export default function Home() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.greeting}>Universidad Internacional Uninter</Text>
-      <Text style={styles.header}>Registro</Text>
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Buscar"
-        />
-        <Icon name="search" size={25} color="gray" style={styles.searchIcon} />
+      <View style={styles.header}>
+        <TouchableOpacity>
+          <Icon name="menu" size={30} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.greeting}>U N I N T E R</Text>
+        <TouchableOpacity>
+          <Icon name="account-circle" size={30} color="#333" />
+        </TouchableOpacity>
       </View>
+      <View style={styles.card}>
+      <TouchableOpacity style={styles.course} onPress={() => navigation.navigate('Assistences')}>
+          <Icon name="content-paste" size={80} color="gray" />
+          <Text style={styles.courseTitle}>Listar Asistentes</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.sectionTitle}>Registrar en:</Text>
       <View style={styles.categories}>
         <TouchableOpacity style={styles.category} onPress={() => Linking.openURL('https://uninter.edu.mx/')}>
-          <Icon name="home" size={40} color="white" />
+          <Icon name="home" size={40} color="#333" />
           <Text style={styles.categoryText}>Landing</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.category} onPress={() => Linking.openURL('https://uninter.edu.mx/sesiones-informativas/')}>
-          <Icon name="info" size={40} color="white" />
-          <Text style={styles.categoryText}>Sesiones Informativas</Text>
+          <Icon name="info" size={40} color="#333" />
+          <Text style={styles.categoryText}>Sesiones</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.category} onPress={() => Linking.openURL('https://uninter.edu.mx/conferencias/')}>
-          <Icon name="forum" size={40} color="white" />
+          <Icon name="forum" size={40} color="#333" />
           <Text style={styles.categoryText}>Conferencias</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.category} onPress={() => Linking.openURL('https://uninter.edu.mx/talleres/')}>
-          <Icon name="kayaking" size={40} color="white" />
+          <Icon name="kayaking" size={40} color="#333" />
           <Text style={styles.categoryText}>Talleres</Text>
         </TouchableOpacity>
       </View>
-      <Text style={styles.subheader}>Confirmar Asistencia</Text>
+      {/* <Text style={styles.sectionTitle}>Confirmar Asistencia</Text>
       <View style={styles.courses}>
         <TouchableOpacity style={styles.course} onPress={() => navigation.navigate('Scanner')}>
           <Icon name="qr-code-scanner" size={80} color="gray" />
@@ -45,13 +52,7 @@ export default function Home() {
           <Icon name="content-paste-search" size={80} color="gray" />
           <Text style={styles.courseTitle}>Buscar por Nombre</Text>
         </TouchableOpacity>
-      </View>
-      <View style={styles.courses}>
-        <TouchableOpacity style={styles.course} onPress={() => navigation.navigate('Assistences')}>
-          <Icon name="content-paste" size={80} color="gray" />
-          <Text style={styles.courseTitle}>Listar Asistentes</Text>
-        </TouchableOpacity>
-       </View>   
+      </View> */}
     </ScrollView>
   );
 }
@@ -62,79 +63,93 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F8FF',
     paddingHorizontal: 20,
   },
-  greeting: {
-    fontSize: 20,
-    marginTop: 40,
-    color: '#333',
-    textAlign: 'center',
-  },
   header: {
-    fontSize: 26,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 40,
+    marginBottom: 20,
+  },
+  greeting: {
+    fontSize: 24,
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  card: {
+    backgroundColor: '#FFF',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  cardDate: {
+    fontSize: 16,
+    color: '#888',
+  },
+  cardTitle: {
+    fontSize: 20,
+    color: '#333',
     fontWeight: 'bold',
     marginVertical: 10,
+  },
+  cardValue: {
+    fontSize: 36,
     color: '#025FF5',
-    textAlign: 'center',
+    fontWeight: 'bold',
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 30,
-    paddingHorizontal: 10,
-    marginVertical: 10,
-    borderColor: '#025FF5',
-    borderWidth: 1,
+  cardValueSmall: {
+    fontSize: 16,
+    color: '#888',
   },
-  searchInput: {
-    flex: 1,
-    padding: 10,
-  },
-  searchIcon: {
-    marginLeft: 10,
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
   },
   categories: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginVertical: 20,
+    marginBottom: 20,
   },
   category: {
+    backgroundColor: '#FFF',
+    borderRadius: 20,
+    padding: 20,
+    width: '45%',
+    marginBottom: 10,
     alignItems: 'center',
-    backgroundColor: '#025FF5',
-    borderRadius: 10,
-    padding: 10,
-    flex: 1,
-    marginHorizontal: 5,
   },
   categoryText: {
-    color: '#fff',
-    marginTop: 5,
-    textAlign: 'center',
+    fontSize: 14,
+    color: '#333',
+    marginTop: 10,
   },
-  subheader: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginVertical: 10,
-    color: '#025FF5',
-    textAlign: 'center',
+  deviceCount: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 5,
   },
   courses: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
   },
   course: {
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    backgroundColor: '#FFF',
+    borderRadius: 20,
     padding: 20,
-    flex: 1,
-    marginHorizontal: 5,
-    borderColor: '#ddd',
-    borderWidth: 1,
+    width: '45%',
+    marginBottom: 10,
+    alignItems: 'center',
   },
   courseTitle: {
-    marginTop: 10,
-    fontSize: 18,
-    textAlign: 'center',
+    fontSize: 16,
     color: '#333',
+    marginTop: 10,
+    textAlign: 'center',
   },
 });
+
+
