@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import moment from 'moment';
-import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 const ShowInfo = ({ route }) => {
   const { data } = route.params;
@@ -21,10 +22,12 @@ const ShowInfo = ({ route }) => {
   const confirmAttendance = async () => {
     setLoading(true);
     try {
+      const token = await AsyncStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/registros/${data.idregistro_conferencias}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           Nombre: nombre,
@@ -41,7 +44,7 @@ const ShowInfo = ({ route }) => {
       if (response.ok) {
         Toast.show({
           type: 'success',
-          text1: 'Asistencia confirmada'
+          text1: 'Asistencia confirmada',
         });
         setTimeout(() => {
           navigation.navigate('Home');
@@ -58,7 +61,7 @@ const ShowInfo = ({ route }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.header}>Registros</Text>
+      <Text style={styles.header}>Información de Registro</Text>
       <View style={styles.infoBox}>
         <Text style={styles.label}>Nombre</Text>
         <TextInput style={styles.input} value={nombre} onChangeText={setNombre} />
@@ -93,20 +96,19 @@ const ShowInfo = ({ route }) => {
           <Picker
             selectedValue={asistio}
             onValueChange={(itemValue) => setAsistio(itemValue)}
-            style={styles.picker}
+            style={styles.input}
           >
             <Picker.Item label="SI" value="SI" />
             <Picker.Item label="NO" value="NO" />
           </Picker>
         </View>
       </View>
-      <TouchableOpacity style={[styles.button, styles.confirmButton]} onPress={confirmAttendance} disabled={loading}>
+      <TouchableOpacity style={styles.button} onPress={confirmAttendance} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? 'Confirmando...' : 'Confirmar Asistencia'}</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => navigation.navigate('Home')}>
+      <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.navigate('Home')}>
         <Text style={styles.buttonText}>Cancelar</Text>
       </TouchableOpacity>
-      <Toast ref={(ref) => Toast.setRef(ref)} />
     </ScrollView>
   );
 };
@@ -122,7 +124,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 20,
-    alignSelf: 'center',
+    textAlign: 'center',
   },
   infoBox: {
     marginBottom: 15,
@@ -147,20 +149,19 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: '#fff',
   },
-  picker: {
-    height: 40,
-  },
   button: {
     marginTop: 20,
+    backgroundColor: '#025FF5',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
   },
-  confirmButton: {
-    backgroundColor: '#025FF5',
-  },
   cancelButton: {
+    marginTop: 10,
     backgroundColor: '#FF0000',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
   },
   buttonText: {
     color: '#fff',

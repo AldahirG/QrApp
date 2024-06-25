@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const List = () => {
   const [search, setSearch] = useState('');
@@ -9,18 +10,26 @@ const List = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/registros')
-      .then(response => response.json())
-      .then(data => setUsers(data))
-      .catch(error => console.error(error));
-  }, []);
+    const fetchUsers = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/registros', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setUsers(data);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      setSearch('');
-    });
-    return unsubscribe;
-  }, [navigation]);
+    fetchUsers();
+  }, []);
 
   const filteredUsers = users.filter(user => 
     user.Nombre.toLowerCase().includes(search.toLowerCase())

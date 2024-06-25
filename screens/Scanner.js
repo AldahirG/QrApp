@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, Animated, Easing } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Scanner() {
   const [hasPermission, setHasPermission] = useState(null);
@@ -31,8 +32,11 @@ export default function Scanner() {
         easing: Easing.linear,
         useNativeDriver: true,
       }),
-    ]).start(() => {
-      navigation.navigate('ShowInfo', { data: JSON.parse(data) });
+    ]).start(async () => {
+      const token = await AsyncStorage.getItem('token');
+      const parsedData = JSON.parse(data);
+      // Aquí puedes incluir una petición si fuera necesario
+      navigation.navigate('ShowInfo', { data: parsedData });
     });
   };
 
@@ -57,7 +61,7 @@ export default function Scanner() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>QR de ASistencia</Text>
+        <Text style={styles.headerText}>QR de Asistencia</Text>
       </View>
       <Animated.View style={[styles.qrContainer, animatedStyle]}>
         <BarCodeScanner

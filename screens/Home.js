@@ -1,10 +1,39 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
+
 
 export default function Home() {
   const navigation = useNavigation();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        setIsAuthenticated(true);
+      } else {
+        Alert.alert('Sesión expirada', 'Por favor, inicia sesión nuevamente');
+        navigation.navigate('Login'); // Redirige a la pantalla de inicio de sesión si no hay token
+      }
+    };
+    checkToken();
+  }, []);
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('token');
+    setIsAuthenticated(false);
+    setModalVisible(false);
+    navigation.navigate('Login');
+  };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -13,12 +42,33 @@ export default function Home() {
           <Icon name="menu" size={30} color="#333" />
         </TouchableOpacity>
         <Text style={styles.greeting}>U N I N T E R</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
           <Icon name="account-circle" size={30} color="#333" />
         </TouchableOpacity>
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+              <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <View style={styles.card}>
-      <TouchableOpacity style={styles.course} onPress={() => navigation.navigate('Assistences')}>
+        <TouchableOpacity style={styles.course} onPress={() => navigation.navigate('Assistences')}>
           <Icon name="content-paste" size={80} color="gray" />
           <Text style={styles.courseTitle}>Listar Asistentes</Text>
         </TouchableOpacity>
@@ -42,17 +92,6 @@ export default function Home() {
           <Text style={styles.categoryText}>Talleres</Text>
         </TouchableOpacity>
       </View>
-      {/* <Text style={styles.sectionTitle}>Confirmar Asistencia</Text>
-      <View style={styles.courses}>
-        <TouchableOpacity style={styles.course} onPress={() => navigation.navigate('Scanner')}>
-          <Icon name="qr-code-scanner" size={80} color="gray" />
-          <Text style={styles.courseTitle}>Escanear QR</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.course} onPress={() => navigation.navigate('List')}>
-          <Icon name="content-paste-search" size={80} color="gray" />
-          <Text style={styles.courseTitle}>Buscar por Nombre</Text>
-        </TouchableOpacity>
-      </View> */}
     </ScrollView>
   );
 }
@@ -82,25 +121,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     alignItems: 'center',
   },
-  cardDate: {
-    fontSize: 16,
-    color: '#888',
-  },
-  cardTitle: {
-    fontSize: 20,
-    color: '#333',
-    fontWeight: 'bold',
-    marginVertical: 10,
-  },
-  cardValue: {
-    fontSize: 36,
-    color: '#025FF5',
-    fontWeight: 'bold',
-  },
-  cardValueSmall: {
-    fontSize: 16,
-    color: '#888',
-  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -126,11 +146,6 @@ const styles = StyleSheet.create({
     color: '#333',
     marginTop: 10,
   },
-  deviceCount: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 5,
-  },
   courses: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -150,6 +165,47 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalView: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  logoutButton: {
+    backgroundColor: '#FF3B30',
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  logoutButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  closeButton: {
+    backgroundColor: '#2196F3',
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
 });
-
-

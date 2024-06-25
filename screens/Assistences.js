@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Assistences = () => {
   const [eventName, setEventName] = useState('');
@@ -11,7 +12,12 @@ const Assistences = () => {
   const fetchAssistances = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/registros/assistances/${encodeURIComponent(eventName)}`);
+      const token = await AsyncStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/registros/assistances/${encodeURIComponent(eventName)}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -27,7 +33,12 @@ const Assistences = () => {
   const fetchPrograms = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/registros/programs/${encodeURIComponent(eventName)}`);
+      const token = await AsyncStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/registros/programs/${encodeURIComponent(eventName)}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -43,7 +54,12 @@ const Assistences = () => {
   const fetchConfirmedAssistances = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/registros/confirmedAssistances/${encodeURIComponent(eventName)}`);
+      const token = await AsyncStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/registros/confirmedAssistances/${encodeURIComponent(eventName)}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }

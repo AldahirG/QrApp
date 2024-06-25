@@ -10,6 +10,7 @@ import List from './screens/List';
 import ShowInfo from './screens/ShowInfo';
 import Scanner from './screens/Scanner';
 import Assistences from './screens/Assistences';
+import Login from './screens/Login';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -57,13 +58,18 @@ function MyTabs() {
   );
 }
 
-export default function App() {
+function App() {
   return (
     <>
       <NavigationContainer>
-        <MyTabs />
+        <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Login">
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Main" component={MyTabs} />
+        </Stack.Navigator>
       </NavigationContainer>
       <Toast ref={(ref) => Toast.setRef(ref)} />
     </>
   );
 }
+
+export default App;
