@@ -18,7 +18,7 @@ export default function Home() {
         setIsAuthenticated(true);
       } else {
         Alert.alert('Sesión expirada', 'Por favor, inicia sesión nuevamente');
-        navigation.navigate('Login'); // Redirige a la pantalla de inicio de sesión si no hay token
+        navigation.navigate('Login'); 
       }
     };
     checkToken();

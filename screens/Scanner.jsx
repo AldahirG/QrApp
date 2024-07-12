@@ -35,7 +35,6 @@ export default function Scanner() {
     ]).start(async () => {
       const token = await AsyncStorage.getItem('token');
       const parsedData = JSON.parse(data);
-      // Aquí puedes incluir una petición si fuera necesario
       navigation.navigate('ShowInfo', { data: parsedData });
     });
   };
