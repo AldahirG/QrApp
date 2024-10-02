@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, Animated, Easing } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, Animated, Easing, Alert } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BASE_URL } from '../config'; // Importing the BASE_URL from config.js
 
 export default function Scanner() {
   const [hasPermission, setHasPermission] = useState(null);
@@ -17,57 +18,48 @@ export default function Scanner() {
     })();
   }, []);
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  const handleBarCodeScanned = async ({ type, data }) => {
     setScanned(true);
-    Animated.sequence([
-      Animated.timing(animation, {
-        toValue: 1,
-        duration: 500,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animation, {
-        toValue: 0,
-        duration: 500,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }),
-    ]).start(async () => {
+    try {
+      const userId = data; // Assuming the scanned data is the user ID
       const token = await AsyncStorage.getItem('token');
-      const parsedData = JSON.parse(data);
-      navigation.navigate('ShowInfo', { data: parsedData });
-    });
+      const response = await fetch(`${BASE_URL}/api/registros/update/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ asistio: true }),
+      });
+
+      if (response.ok) {
+        Alert.alert("Success", "Attendance marked successfully.");
+      } else {
+        Alert.alert("Error", "Failed to update attendance.");
+      }
+    } catch (error) {
+      Alert.alert("Error", "An error occurred during the update.");
+    } finally {
+      setScanned(false);
+    }
   };
 
   if (hasPermission === null) {
-    return <Text>Permisos de Cámara</Text>;
+    return <Text>Requesting camera permission...</Text>;
   }
   if (hasPermission === false) {
     return <Text>No access to camera</Text>;
   }
 
-  const animatedStyle = {
-    transform: [
-      {
-        scale: animation.interpolate({
-          inputRange: [0, 1],
-          outputRange: [1, 1.2],
-        }),
-      },
-    ],
-  };
-
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>QR de Asistencia</Text>
-      </View>
-      <Animated.View style={[styles.qrContainer, animatedStyle]}>
+      <Text style={styles.headerText}>Scan QR Code</Text>
+      <View style={styles.qrContainer}>
         <BarCodeScanner
           onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
           style={StyleSheet.absoluteFillObject}
         />
-      </Animated.View>
+      </View>
       {scanned && (
         <TouchableOpacity style={styles.button} onPress={() => setScanned(false)}>
           <Text style={styles.buttonText}>Tap to Scan Again</Text>
@@ -84,27 +76,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  header: {
-    position: "absolute",
-    top: 60,
-    alignItems: "center",
-  },
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "black",
+    marginBottom: 20,
   },
   qrContainer: {
-    width: 250,
-    height: 250,
+    width: 300,
+    height: 300,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
+    overflow: 'hidden',
   },
   button: {
-    position: "absolute",
-    bottom: 60,
+    marginTop: 20,
     backgroundColor: "#800080",
     borderRadius: 25,
     paddingVertical: 10,

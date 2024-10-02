@@ -5,54 +5,64 @@ import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
+import { BASE_URL } from '../config'; // Aquí estamos usando tu archivo config.js
 
 const ShowInfo = ({ route }) => {
   const { data } = route.params;
   const [loading, setLoading] = useState(false);
-  const [nombre, setNombre] = useState(data.Nombre);
-  const [correo, setCorreo] = useState(data.Correo);
-  const [telefono, setTelefono] = useState(data.Telefono);
-  const [nivelEstudios, setNivelEstudios] = useState(data.Nivel_Estudios);
-  const [conferencista, setConferencista] = useState(data.Conferencista);
-  const [nombreInvito, setNombreInvito] = useState(data.Nombre_invito);
-  const [fechaRegistro, setFechaRegistro] = useState(moment(data.fecha_registro).format('DD/MM/YYYY'));
-  const [asistio, setAsistio] = useState(data.asistio);
+  const [nombre, setNombre] = useState(data.nombre || ''); 
+  const [correo, setCorreo] = useState(data.correo || '');
+  const [telefono, setTelefono] = useState(data.telefono || '');
+  const [escuelaProcedencia, setEscuelaProcedencia] = useState(data.escuelaProcedencia || '');
+  const [artista, setArtista] = useState(data.artista || '');
+  const [disfraz, setDisfraz] = useState(data.disfraz || '');
+  const [nombreInvito, setNombreInvito] = useState(data.invito || '');
+  const [programa, setPrograma] = useState(data.programa || ''); // Nuevo campo para el programa
+  const [fechaRegistro, setFechaRegistro] = useState(moment(data.fechaRegistro).format('DD/MM/YYYY') || '');
+  const [asistio, setAsistio] = useState(data.asistio ? 'SI' : 'NO');
   const navigation = useNavigation();
 
   const confirmAttendance = async () => {
     setLoading(true);
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/registros/${data.idregistro_conferencias}`, {
+      const response = await fetch(`${BASE_URL}/api/registros/${data.idhalloweenfest_registro}`, { 
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          Nombre: nombre,
-          Correo: correo,
-          Telefono: telefono,
-          Nivel_Estudios: nivelEstudios,
-          Conferencista: conferencista,
-          Nombre_invito: nombreInvito,
-          fecha_registro: moment(fechaRegistro, 'DD/MM/YYYY').toISOString(),
-          asistio: asistio
+          nombre,
+          correo,
+          telefono,
+          escuelaProcedencia,
+          artista,
+          disfraz,
+          invito: nombreInvito,
+          programa, // Enviar el programa como parte del body
+          fechaRegistro: moment(fechaRegistro, 'DD/MM/YYYY').toISOString(),
+          asistio: asistio === 'SI' ? 1 : 0 
         })
       });
+
       const result = await response.json();
+      console.log('Resultado de la actualización:', result);
+
       if (response.ok) {
         Toast.show({
           type: 'success',
           text1: 'Asistencia confirmada',
         });
         setTimeout(() => {
-          navigation.navigate('Home');
+          navigation.navigate('Home'); 
         }, 2000);
       } else {
-        Alert.alert('Error', result.message);
+        console.error('Error del servidor:', result);
+        Alert.alert('Error', result.message || 'Error en la actualización');
       }
     } catch (error) {
+      console.error('Error en la solicitud:', error);
       Alert.alert('Error', error.message);
     } finally {
       setLoading(false);
@@ -75,16 +85,24 @@ const ShowInfo = ({ route }) => {
         <TextInput style={styles.input} value={telefono} onChangeText={setTelefono} />
       </View>
       <View style={styles.infoBox}>
-        <Text style={styles.label}>Nivel de Estudios</Text>
-        <TextInput style={styles.input} value={nivelEstudios} onChangeText={setNivelEstudios} />
+        <Text style={styles.label}>Escuela de Procedencia</Text>
+        <TextInput style={styles.input} value={escuelaProcedencia} onChangeText={setEscuelaProcedencia} />
       </View>
       <View style={styles.infoBox}>
-        <Text style={styles.label}>Conferencista</Text>
-        <TextInput style={styles.input} value={conferencista} onChangeText={setConferencista} />
+        <Text style={styles.label}>Artista</Text>
+        <TextInput style={styles.input} value={artista} onChangeText={setArtista} />
+      </View>
+      <View style={styles.infoBox}>
+        <Text style={styles.label}>Disfraz</Text>
+        <TextInput style={styles.input} value={disfraz} onChangeText={setDisfraz} />
       </View>
       <View style={styles.infoBox}>
         <Text style={styles.label}>Nombre de quien invitó</Text>
         <TextInput style={styles.input} value={nombreInvito} onChangeText={setNombreInvito} />
+      </View>
+      <View style={styles.infoBox}>
+        <Text style={styles.label}>Programa</Text>
+        <TextInput style={styles.input} value={programa} onChangeText={setPrograma} /> 
       </View>
       <View style={styles.infoBox}>
         <Text style={styles.label}>Fecha de Registro</Text>

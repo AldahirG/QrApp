@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking, Alert, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
-
+import { BASE_URL } from '../config';  // Asegúrate de tener configurado el BASE_URL
 
 export default function Home() {
   const navigation = useNavigation();
@@ -73,6 +73,7 @@ export default function Home() {
           <Text style={styles.courseTitle}>Listar Asistentes</Text>
         </TouchableOpacity>
       </View>
+      
       <Text style={styles.sectionTitle}>Registrar en:</Text>
       <View style={styles.categories}>
         <TouchableOpacity style={styles.category} onPress={() => Linking.openURL('https://uninter.edu.mx/')}>

@@ -11,6 +11,7 @@ import ShowInfo from './screens/ShowInfo';
 import Scanner from './screens/Scanner';
 import Assistences from './screens/Assistences';
 import Login from './screens/Login';
+import Register from './screens/Register'; // Import the new Register screen
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -38,6 +39,8 @@ function MyTabs() {
             iconName = 'home';
           } else if (route.name === 'ListStack') {
             iconName = 'list';
+          } else if (route.name === 'Register') {
+            iconName = 'person-add';
           } else if (route.name === 'Scanner') {
             iconName = 'qr-code-scanner';
           } else if (route.name === 'Assistences') {
@@ -52,6 +55,7 @@ function MyTabs() {
     >
       <Tab.Screen name="Home" component={Home} options={{ title: 'Inicio' }} />
       <Tab.Screen name="ListStack" component={ListStack} options={{ title: 'Registros' }} />
+      <Tab.Screen name="Register" component={Register} options={{ title: 'Registro' }} /> 
       <Tab.Screen name="Scanner" component={Scanner} />
       <Tab.Screen name="Assistences" component={Assistences} options={{ title: 'Asistencias' }} />
     </Tab.Navigator>
