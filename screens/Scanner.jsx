@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, Animated, Easing, Alert } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, Alert as RNAlert, ImageBackground } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,7 +8,6 @@ import { BASE_URL } from '../config'; // Importing the BASE_URL from config.js
 export default function Scanner() {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
-  const [animation] = useState(new Animated.Value(0));
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -33,53 +32,73 @@ export default function Scanner() {
       });
 
       if (response.ok) {
-        Alert.alert("Success", "Attendance marked successfully.");
+        RNAlert.alert(
+          "Confirmado",
+          "Asistencia confirmada exitosamente.",
+          [
+            { text: "OK", onPress: () => setScanned(false) }
+          ],
+          { cancelable: false }
+        );
       } else {
-        Alert.alert("Error", "Failed to update attendance.");
+        RNAlert.alert("Error", "No se pudo actualizar la asistencia.");
+        setScanned(false);
       }
     } catch (error) {
-      Alert.alert("Error", "An error occurred during the update.");
-    } finally {
+      RNAlert.alert("Error", "Hubo un error durante la actualización.");
       setScanned(false);
     }
   };
 
   if (hasPermission === null) {
-    return <Text>Requesting camera permission...</Text>;
+    return <Text>Solicitando permiso para la cámara...</Text>;
   }
   if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
+    return <Text>No se tiene acceso a la cámara</Text>;
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.headerText}>Scan QR Code</Text>
-      <View style={styles.qrContainer}>
-        <BarCodeScanner
-          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-          style={StyleSheet.absoluteFillObject}
-        />
+    <ImageBackground
+      source={require('../assets/banner.jpg')} // Importing the banner image as background
+      style={styles.background}
+    >
+      <View style={styles.container}>
+        <Text style={styles.headerText}>Escanear Código QR</Text>
+        <View style={styles.qrContainer}>
+          <BarCodeScanner
+            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+            style={StyleSheet.absoluteFillObject}
+          />
+        </View>
+        {scanned && (
+          <TouchableOpacity style={styles.button} onPress={() => setScanned(false)}>
+            <Text style={styles.buttonText}>Toca para escanear de nuevo</Text>
+          </TouchableOpacity>
+        )}
       </View>
-      {scanned && (
-        <TouchableOpacity style={styles.button} onPress={() => setScanned(false)}>
-          <Text style={styles.buttonText}>Tap to Scan Again</Text>
-        </TouchableOpacity>
-      )}
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    resizeMode: 'cover', // Ensures the background covers the entire view
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   container: {
     flex: 1,
-    backgroundColor: "#F0F8FF",
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
   },
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
+    color: "#f9a602", // Bright orange/yellow color for the header text
     marginBottom: 20,
+    textAlign: 'center',
   },
   qrContainer: {
     width: 300,
@@ -89,10 +108,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 10,
     overflow: 'hidden',
+    borderColor: '#8a2466', // Border color matching the theme
+    borderWidth: 2,
   },
   button: {
     marginTop: 20,
-    backgroundColor: "#800080",
+    backgroundColor: "#8a2466", // Purple color for the button
     borderRadius: 25,
     paddingVertical: 10,
     paddingHorizontal: 40,

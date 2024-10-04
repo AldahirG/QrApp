@@ -49,8 +49,18 @@ function MyTabs() {
 
           return <Icon name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: 'blue',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: '#FFA500', // Halloween-themed active icon color
+        tabBarInactiveTintColor: '#fff', // Inactive icon color
+        tabBarStyle: {
+          backgroundColor: '#8a2466', // Background color of the tab bar
+          borderTopWidth: 0, // Remove the top border (white line)
+        },
+        headerStyle: {
+          backgroundColor: '#8a2466', // Header background color
+          borderTopWidth: 0, // Remove the top border (white line)
+        },
+        headerTintColor: '#FFA500', // Header text color
+        borderTopWidth: 0, // Remove the top border (white line)
       })}
     >
       <Tab.Screen name="Home" component={Home} options={{ title: 'Inicio' }} />
