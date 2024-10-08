@@ -5,7 +5,7 @@ import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
-import { BASE_URL } from '../config'; 
+import { BASE_URL } from '../config';
 
 const ShowInfo = ({ route }) => {
   const { data } = route.params; 
@@ -13,12 +13,12 @@ const ShowInfo = ({ route }) => {
   const [nombre, setNombre] = useState(data.nombre || ''); 
   const [correo, setCorreo] = useState(data.correo || '');
   const [telefono, setTelefono] = useState(data.telefono || '');
-  const [escuelaProcedencia, setEscuelaProcedencia] = useState(data.escuelaProcedencia || '');
-  const [artista, setArtista] = useState(data.artista || '');
-  const [disfraz, setDisfraz] = useState(data.disfraz || '');
+  const [programa, setPrograma] = useState(data.programa || '');  // Grado en lugar de Programa
+  const [disfraz, setDisfraz] = useState(data.disfraz || '');  // Participar en el concurso de disfraces
   const [nombreInvito, setNombreInvito] = useState(data.invito || '');
-  const [fechaRegistro, setFechaRegistro] = useState(moment(data.fechaRegistro).format('DD/MM/YYYY') || '');
+  const [fechaRegistro, setFechaRegistro] = useState(data.fechaRegistro ? moment(data.fechaRegistro).format('DD/MM/YYYY') : '');
   const [asistio, setAsistio] = useState(data.asistio ? 'SI' : 'NO');
+  const [comoEnteroEvento, setComoEnteroEvento] = useState(data.comoEnteroEvento || '');
   const navigation = useNavigation();
 
   const confirmAttendance = async () => {
@@ -35,12 +35,12 @@ const ShowInfo = ({ route }) => {
           nombre,
           correo,
           telefono,
-          escuelaProcedencia,
-          artista,
-          disfraz,
-          invito: nombreInvito,
-          fechaRegistro: moment(fechaRegistro, 'DD/MM/YYYY').toISOString(), 
-          asistio: asistio === 'SI' ? 1 : 0 
+          programa,  // Grado
+          disfraz,  // Participar en el concurso de disfraces
+          invito: nombreInvito,  // Quien te invitó
+          fechaRegistro: moment(fechaRegistro, 'DD/MM/YYYY').toISOString(),  // Fecha de registro
+          asistio: asistio === 'SI' ? 1 : 0,
+          comoEnteroEvento,  // Cómo se enteró
         })
       });
 
@@ -71,39 +71,96 @@ const ShowInfo = ({ route }) => {
     >
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.header}>Información de Registro</Text>
+
+        {/* Campo Nombre */}
         <View style={styles.infoBox}>
           <Text style={styles.label}>Nombre</Text>
-          <TextInput style={styles.input} value={nombre} onChangeText={setNombre} />
+          <TextInput style={styles.input} value={nombre} editable={false} />
         </View>
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Correo</Text>
-          <TextInput style={styles.input} value={correo} onChangeText={setCorreo} />
-        </View>
+
+        {/* Campo Teléfono */}
         <View style={styles.infoBox}>
           <Text style={styles.label}>Teléfono</Text>
-          <TextInput style={styles.input} value={telefono} onChangeText={setTelefono} />
+          <TextInput style={styles.input} value={telefono} editable={telefono === ''} onChangeText={setTelefono} />
         </View>
+
+        {/* Campo Correo */}
         <View style={styles.infoBox}>
-          <Text style={styles.label}>Escuela de Procedencia</Text>
-          <TextInput style={styles.input} value={escuelaProcedencia} onChangeText={setEscuelaProcedencia} />
+          <Text style={styles.label}>Correo</Text>
+          <TextInput style={styles.input} value={correo} editable={correo === ''} onChangeText={setCorreo} />
         </View>
+
+        {/* Campo Programa (Grado) */}
         <View style={styles.infoBox}>
-          <Text style={styles.label}>Artista</Text>
-          <TextInput style={styles.input} value={artista} onChangeText={setArtista} />
+          <Text style={styles.label}>Programa</Text>
+          {programa ? (
+            <TextInput style={styles.input} value={programa} editable={false} />
+          ) : (
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={programa}
+                onValueChange={(itemValue) => setPrograma(itemValue)}
+                style={styles.picker}
+              >
+                <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
+                <Picker.Item label="SECUNDARIA" value="SECUNDARIA" />
+                <Picker.Item label="BACHILLERATO" value="BACHILLERATO" />
+                <Picker.Item label="UNIVERSIDAD" value="UNIVERSIDAD" />
+                <Picker.Item label="POSGRADO" value="POSGRADO" />
+              </Picker>
+            </View>
+          )}
         </View>
+
+        {/* Campo Disfraz (Participar en el concurso de disfraces) */}
         <View style={styles.infoBox}>
-          <Text style={styles.label}>Disfraz</Text>
-          <TextInput style={styles.input} value={disfraz} onChangeText={setDisfraz} />
+          <Text style={styles.label}>¿Participarás en el concurso de disfraces?</Text>
+          {disfraz ? (
+            <TextInput style={styles.input} value={disfraz} editable={false} />
+          ) : (
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={disfraz}
+                onValueChange={(itemValue) => setDisfraz(itemValue)}
+                style={styles.picker}
+              >
+                <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
+                <Picker.Item label="SI" value="SI" />
+                <Picker.Item label="NO" value="NO" />
+              </Picker>
+            </View>
+          )}
         </View>
+
+        {/* Campo Nombre de quien invitó */}
         <View style={styles.infoBox}>
-          <Text style={styles.label}>Nombre de quien invitó</Text>
-          <TextInput style={styles.input} value={nombreInvito} onChangeText={setNombreInvito} />
+          <Text style={styles.label}>¿Quién te invitó?</Text>
+          {nombreInvito ? (
+            <TextInput style={styles.input} value={nombreInvito} editable={false} />
+          ) : (
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={nombreInvito}
+                onValueChange={(itemValue) => setNombreInvito(itemValue)}
+                style={styles.picker}
+              >
+                <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
+                <Picker.Item label="SECUNDARIA" value="SECUNDARIA" />
+                <Picker.Item label="BACHILLERATO" value="BACHILLERATO" />
+                <Picker.Item label="UNIVERSIDAD" value="UNIVERSIDAD" />
+                <Picker.Item label="POSGRADO" value="POSGRADO" />
+              </Picker>
+            </View>
+          )}
         </View>
+
+        {/* Campo Fecha de Registro */}
         <View style={styles.infoBox}>
           <Text style={styles.label}>Fecha de Registro</Text>
           <TextInput style={styles.input} value={fechaRegistro} editable={false} />
         </View>
 
+        {/* Campo ¿Asistió? */}
         <View style={styles.infoBox}>
           <Text style={styles.label}>¿Asistió?</Text>
           <View style={styles.pickerContainer}>
@@ -112,10 +169,37 @@ const ShowInfo = ({ route }) => {
               onValueChange={(itemValue) => setAsistio(itemValue)}
               style={styles.picker}
             >
-      <Picker.Item label="SI" value="SI" style={{ color: '#8a2466' }} />  {/* Color blanco para opciones */}
-      <Picker.Item label="NO" value="NO" style={{ color: '#8a2466' }} />
+              <Picker.Item label="SI" value="SI" />
+              <Picker.Item label="NO" value="NO" />
             </Picker>
           </View>
+        </View>
+
+        {/* Campo ¿Cómo te enteraste del evento? */}
+        <View style={styles.infoBox}>
+          <Text style={styles.label}>¿Cómo te enteraste del evento?</Text>
+          {comoEnteroEvento ? (
+            <TextInput style={styles.input} value={comoEnteroEvento} editable={false} />
+          ) : (
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={comoEnteroEvento}
+                onValueChange={(itemValue) => setComoEnteroEvento(itemValue)}
+                style={styles.picker}
+              >
+                <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
+                <Picker.Item label="REDES SOCIALES" value="Redes sociales" />
+                <Picker.Item label="PÁGINA WEB" value="Página web" />
+                <Picker.Item label="VISITA ESCUELA" value="Visita escuela" />
+                <Picker.Item label="PUBLICIDAD EN CALLE" value="Publicidad en calle" />
+                <Picker.Item label="ME ENVIARON MENSAJE" value="Me enviaron mensaje" />
+                <Picker.Item label="YA LO CONOCÍA" value="Ya lo conocía" />
+                <Picker.Item label="POR INVITACIÓN AMIGO" value="Por invitación amigo" />
+                <Picker.Item label="CORREO" value="Correo" />
+                <Picker.Item label="RADIO" value="Radio" />
+              </Picker>
+            </View>
+          )}
         </View>
 
         <TouchableOpacity style={styles.button} onPress={confirmAttendance} disabled={loading}>
@@ -163,16 +247,16 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   pickerContainer: {
-    borderColor: '#f9a602', // Borde naranja
+    borderColor: '#f9a602',
     borderWidth: 0,
     borderRadius: 10,
-    backgroundColor: '#8a2466', // Fondo morado del contenedor
+    backgroundColor: '#8a2466',
     justifyContent: 'center',
     height: 40,
   },
   picker: {
-    color: '#fff', // Color blanco para el texto seleccionado
-    backgroundColor: '#8a2466', // Quitar fondo adicional
+    color: '#fff',
+    backgroundColor: '#8a2466',
   },
   button: {
     marginTop: 20,

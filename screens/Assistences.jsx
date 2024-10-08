@@ -7,6 +7,7 @@ const Assistences = () => {
   const [assistances, setAssistances] = useState([]);
   const [confirmedAssistances, setConfirmedAssistances] = useState([]);
   const [assistancesByPrograma, setAssistancesByPrograma] = useState([]);
+  const [assistancesByEnteroEvento, setAssistancesByEnteroEvento] = useState([]); // Estado para nuevo campo
   const [loading, setLoading] = useState(false);
 
   const fetchAssistances = async () => {
@@ -72,10 +73,32 @@ const Assistences = () => {
     }
   };
 
+  const fetchAssistancesByEnteroEvento = async () => {  // Nueva función
+    setLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await fetch(`${BASE_URL}/api/registros/getAssistancesByEnteroEvento`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      setAssistancesByEnteroEvento(data);  // Guardar los datos del nuevo campo
+    } catch (error) {
+      console.error('Error fetching assistances by entero evento:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearch = () => {
     fetchAssistances();
     fetchConfirmedAssistances();
     fetchAssistancesByPrograma();
+    fetchAssistancesByEnteroEvento(); // Añadir nueva consulta
   };
 
   const renderAssistanceItem = ({ item }) => (
@@ -99,13 +122,20 @@ const Assistences = () => {
     </View>
   );
 
+  const renderAssistanceByEnteroEventoItem = ({ item }) => (  // Nuevo render para el campo "comoEnteroEvento"
+    <View style={styles.row}>
+      <Text style={styles.cell}>{item.comoEnteroEvento || 'Ninguno'}</Text>
+      <Text style={[styles.cell, styles.cellRight]}>{item.total}</Text>
+    </View>
+  );
+
   return (
     <ImageBackground
       source={require('../assets/banner.jpg')}
       style={styles.background}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.header}>Asistencias por Invitador, Programa y Confirmados</Text>
+        <Text style={styles.header}>Asistencias por Invitador, Programa, Confirmados y Entero del Evento</Text>
 
         <TouchableOpacity style={styles.button} onPress={handleSearch}>
           <Text style={styles.buttonText}>{loading ? 'Cargando...' : 'Buscar'}</Text>
@@ -176,6 +206,29 @@ const Assistences = () => {
             )}
           />
         </View>
+
+        {/* Nuevo: Asistencias por como se enteró del evento */}
+        <View style={styles.tableContainer}>
+          <Text style={styles.tableHeader}>Registros por Medio de Entero del Evento</Text>
+          <View style={styles.rowHeader}>
+            <Text style={[styles.cell, styles.headerCell]}>Medio</Text>
+            <Text style={[styles.cell, styles.headerCellRight]}>Total</Text>
+          </View>
+          <FlatList
+            data={assistancesByEnteroEvento}
+            renderItem={renderAssistanceByEnteroEventoItem}
+            keyExtractor={(item) => item.comoEnteroEvento}
+            ListFooterComponent={() => (
+              <View style={styles.rowFooter}>
+                <Text style={styles.cellFooter}>Total general</Text>
+                <Text style={[styles.cell, styles.cellFooterRight]}>
+                  {assistancesByEnteroEvento.reduce((acc, item) => acc + item.total, 0)}
+                </Text>
+              </View>
+            )}
+          />
+        </View>
+
       </ScrollView>
     </ImageBackground>
   );
@@ -209,12 +262,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   tableContainer: {
-    backgroundColor: '#8a2466',
+    backgroundColor: '#2F2446',
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 20,
     borderColor: '#f9a602', // Naranja para el borde
-    borderWidth: 1,
+    borderWidth: 2,
   },
   tableHeader: {
     fontSize: 20,
@@ -225,23 +278,23 @@ const styles = StyleSheet.create({
   },
   rowHeader: {
     flexDirection: 'row',
-    backgroundColor: '#8a2466',
+    backgroundColor: '#2F2446',
     paddingVertical: 10,
-    borderBottomWidth: 1,
+    borderBottomWidth: 2,
     borderBottomColor: '#f9a602',
   },
   row: {
     flexDirection: 'row',
     paddingVertical: 10,
-    borderBottomWidth: 1,
+    borderBottomWidth: 2,
     borderBottomColor: '#f9a602',
   },
   rowFooter: {
     flexDirection: 'row',
     paddingVertical: 10,
-    borderTopWidth: 1,
+    borderTopWidth: 2,
     borderTopColor: '#f9a602',
-    backgroundColor: '#8a2466',
+    backgroundColor: '#2F2446',
   },
   cell: {
     flex: 1,
