@@ -13,11 +13,7 @@ const List = () => {
   const fetchUsers = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/api/registros`, { // Utiliza BASE_URL aquí
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await fetch(`${BASE_URL}/api/registros`); // Utiliza BASE_URL aquí
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -44,7 +40,7 @@ const List = () => {
     <TouchableOpacity style={styles.itemContainer} onPress={() => navigation.navigate('ShowInfo', { data: item })}>
       <Ionicons name="person-circle-outline" size={40} color="#f9a602" /> {/* Naranja para el icono */}
       <View style={styles.itemTextContainer}>
-        <Text style={styles.itemName}>{item.nombre}</Text>
+         <Text style={styles.itemName}>{item.nombre}</Text>
         <Text style={styles.itemEmail}>{item.correo}</Text>
       </View>
     </TouchableOpacity>

@@ -135,7 +135,7 @@ const Assistences = () => {
       style={styles.background}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.header}>Asistencias por Invitador, Programa, Confirmados y Entero del Evento</Text>
+        <Text style={styles.header}>Reportes</Text>
 
         <TouchableOpacity style={styles.button} onPress={handleSearch}>
           <Text style={styles.buttonText}>{loading ? 'Cargando...' : 'Buscar'}</Text>

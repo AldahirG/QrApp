@@ -27,10 +27,10 @@ const ShowInfo = ({ route }) => {
       const token = await AsyncStorage.getItem('token');
       const response = await fetch(`${BASE_URL}/api/registros/update/${data.idhalloweenfest_registro}`, { 
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        // headers: {
+        //   'Content-Type': 'application/json',
+        //   'Authorization': `Bearer ${token}`
+        // },
         body: JSON.stringify({
           nombre,
           correo,

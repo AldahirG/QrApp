@@ -16,10 +16,11 @@ export default function Home() {
       const token = await AsyncStorage.getItem('token');
       if (token) {
         setIsAuthenticated(true);
-      } else {
-        Alert.alert('Sesión expirada', 'Por favor, inicia sesión nuevamente');
-        navigation.navigate('Login'); 
-      }
+      } 
+      // else {
+      //   Alert.alert('Sesión expirada', 'Por favor, inicia sesión nuevamente');
+      //   navigation.navigate('Login'); 
+      // }
     };
     checkToken();
   }, []);

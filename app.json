@@ -16,12 +16,20 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "foregroundImage": "./assets/HF-LOGO-2024.png",
+        "backgroundColor": "#ffffff",
+        "package":"com.aldahirg.QrApp", 
+        "versionCode": 1
+      },
+      "package": "com.aldahirg.QrApp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9d7dac40-ae38-4c6e-bd37-be8e70470483"
+      }
     }
   }
 }
