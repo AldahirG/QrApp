@@ -11,7 +11,6 @@ import List from './screens/List';
 import ShowInfo from './screens/ShowInfo';
 import Scanner from './screens/Scanner';
 import Assistences from './screens/Assistences';
-import Login from './screens/Login';
 import Register from './screens/Register'; // Import the new Register screen
 
 const Tab = createBottomTabNavigator();
@@ -77,8 +76,7 @@ function App() {
   return (
     <>
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Login">
-          <Stack.Screen name="Login" component={Login} />
+        <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Main">
           <Stack.Screen name="Main" component={MyTabs} />
         </Stack.Navigator>
       </NavigationContainer>
