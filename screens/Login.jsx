@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable, ActivityIndicator, StyleSheet, ImageBackground, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { FontAwesome } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BASE_URL } from '../config';  // Importar la URL base desde config.js
 
 const Login = ({ navigation }) => {
   const [user, setUser] = useState('');
@@ -11,9 +11,19 @@ const Login = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    if (!user || !password) {
+      Toast.show({
+        type: 'error',
+        text1: 'Campos vacíos',
+        text2: 'Por favor, llena todos los campos.',
+      });
+      return;
+    }
+
     setLoading(true);
+
     try {
-      const response = await fetch('http://localhost:5000/api/users/login', {
+      const response = await fetch(`${BASE_URL}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -26,21 +36,21 @@ const Login = ({ navigation }) => {
         await AsyncStorage.setItem('token', data.token);
         Toast.show({
           type: 'success',
-          text1: 'Inicio de sesión exitoso',
+          text1: 'Login Exitoso',
         });
         navigation.navigate('Main');
       } else {
         Toast.show({
           type: 'error',
-          text1: 'Error de inicio de sesión',
-          text2: data.message,
+          text1: 'Error en el login',
+          text2: data.message || 'Revisa tus credenciales',
         });
       }
     } catch (error) {
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Error al iniciar sesión',
+        text1: 'Error en el servidor',
+        text2: 'Hubo un problema en la conexión',
       });
     } finally {
       setLoading(false);
@@ -48,65 +58,83 @@ const Login = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>U N I N T E R</Text>
-      <Text style={styles.subtitle}>Gestión de Asistentes a Eventos</Text>
-      <View style={styles.inputContainer}>
-        <Icon name="email" size={20} color="#666" style={styles.inputIcon} />
-        <TextInput
-          style={styles.input}
-          placeholder="Usuario"
-          value={user}
-          onChangeText={setUser}
+    <ImageBackground
+      source={require('../assets/banner.jpg')}
+      style={styles.background}
+    >
+      <View style={styles.container}>
+        {/* Halloween Fest Logo */}
+        <Image
+          source={require('../assets/HF-LOGO-2024.png')}
+          style={styles.logo}
+          resizeMode="contain"
         />
+        <Text style={styles.subtitle}>Gestión de Asistentes a Eventos</Text>
+        <View style={styles.inputContainer}>
+          <Icon name="email" size={20} color="#666" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Usuario"
+            value={user}
+            onChangeText={setUser}
+            placeholderTextColor="#999"
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <Icon name="lock" size={20} color="#666" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            placeholderTextColor="#999"
+          />
+        </View>
+        <Pressable>
+          <Text style={styles.forgotPassword}>Ingresa los Datos Para Continuar</Text>
+        </Pressable>
+        <Pressable
+          style={styles.button}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Login</Text>
+          )}
+        </Pressable>
+        <Toast />
       </View>
-      <View style={styles.inputContainer}>
-        <Icon name="lock" size={20} color="#666" style={styles.inputIcon} />
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        <TouchableOpacity style={styles.eyeIcon}>
-          <Icon name="visibility" size={20} color="#666" />
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity>
-        <Text style={styles.forgotPassword}>Ingresa los Datos Para Continuar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Cargando...' : 'Login'}</Text>
-      </TouchableOpacity>
-      
-      {/* <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-        <Text style={styles.registerText}>Don't have an account? Register</Text>
-      </TouchableOpacity> */}
-      <Toast ref={(ref) => Toast.setRef(ref)} />
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#F0F8FF',
+    alignItems: 'center',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 10,
+  container: {
+    backgroundColor: '#53103c', // Container background color
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '85%',
+  },
+  logo: {
+    width: 250,
+    height: 150,
+    marginBottom: 20,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
     marginBottom: 20,
+    textAlign: 'center',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -117,16 +145,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: '#ddd',
+    width: '100%',
   },
   input: {
     flex: 1,
     padding: 10,
+    color: '#333',
   },
   inputIcon: {
     marginRight: 10,
-  },
-  eyeIcon: {
-    padding: 10,
   },
   forgotPassword: {
     fontSize: 14,
@@ -135,34 +162,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#025FF5',
+    backgroundColor: '#8a2466', // Button color
     padding: 15,
     borderRadius: 10,
+    width: '100%',
     alignItems: 'center',
-    marginBottom: 20,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-  },
-  orText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  socialContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  socialButton: {
-    marginHorizontal: 10,
-  },
-  registerText: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
   },
 });
 

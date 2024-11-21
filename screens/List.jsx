@@ -1,86 +1,117 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Button } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BASE_URL } from '../config'; // Importa correctamente BASE_URL
 
 const List = () => {
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState([]);
+  const [showResults, setShowResults] = useState(false); // Para controlar si se muestran los resultados
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/registros', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        setUsers(data);
-      } catch (error) {
-        console.error('Error fetching users:', error);
+  const fetchUsers = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await fetch(`${BASE_URL}/api/registros`, {
+        // headers: {
+        //   'Authorization': `Bearer ${token}`
+        // }
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
-    };
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
 
-    fetchUsers();
-  }, []);
+  // Solo ejecutar la búsqueda cuando se presiona el botón
+  const handleSearch = () => {
+    fetchUsers(); // Ejecutar la búsqueda
+    setShowResults(true); // Mostrar los resultados después de la búsqueda
+  };
 
-  const filteredUsers = users.filter(user => 
-    user.Nombre.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.itemContainer} onPress={() => navigation.navigate('ShowInfo', { data: item })}>
-      <Ionicons name="person-circle-outline" size={40} color="#025FF5" />
-      <View style={styles.itemTextContainer}>
-        <Text style={styles.itemName}>{item.Nombre}</Text>
-        <Text style={styles.itemEmail}>{item.Correo}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  // Filtrar los usuarios según la búsqueda
+  const filteredUsers = users
+    .filter(user =>
+      user.nombre.toLowerCase().includes(search.toLowerCase()) || 
+      user.correo.toLowerCase().includes(search.toLowerCase())
+    )
+    .slice(0, 10); // Limitar a los primeros 10 usuarios
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#aaa" />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Buscar usuarios"
-          value={search}
-          onChangeText={setSearch}
-        />
-      </View>
-      <FlatList
-        data={filteredUsers}
-        renderItem={renderItem}
-        keyExtractor={item => item.idregistro_conferencias.toString()}
-        ListEmptyComponent={<Text style={styles.noResultsText}>No se encontraron usuarios</Text>}
-      />
-    </ScrollView>
+    <ImageBackground
+      source={require('../assets/banner.jpg')}  // Fondo de la imagen
+      style={styles.background}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="#aaa" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Buscar usuarios"
+            value={search}
+            onChangeText={setSearch}
+            placeholderTextColor="#ddd"
+          />
+        </View>
+        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+          <Text style={styles.searchButtonText}>Buscar</Text>
+        </TouchableOpacity>
+
+        {/* Mostrar los resultados solo si se ha presionado buscar */}
+        {showResults && (
+          filteredUsers.length > 0 ? (
+            <View style={styles.tableContainer}>
+              <View style={styles.tableHeader}>
+                <Text style={styles.tableHeaderText}>Nombre</Text>
+                <Text style={styles.tableHeaderText}>Telefono</Text>
+                <Text style={styles.tableHeaderText}>Acciones</Text>
+              </View>
+              {filteredUsers.map(user => (
+                <View key={user.idhalloweenfest_registro} style={styles.tableRow}>
+                  <Text style={styles.tableCell}>{user.nombre}</Text>
+                  <Text style={styles.tableCell}>{user.telefono}</Text>
+                  <TouchableOpacity 
+                    style={styles.button}
+                    onPress={() => navigation.navigate('ShowInfo', { data: user })}
+                  >
+                    <Text style={styles.buttonText}>Ver</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.noResultsText}>No se encontraron usuarios</Text>
+          )
+        )}
+      </ScrollView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    justifyContent: 'center',
+  },
   container: {
     flexGrow: 1,
     padding: 20,
-    backgroundColor: '#F0F8FF',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#2F2446',
     borderRadius: 30,
     paddingHorizontal: 10,
     paddingVertical: 5,
     marginBottom: 20,
-    borderColor: '#025FF5',
+    borderColor: '#f9a602', // Naranja para el borde del input
     borderWidth: 1,
   },
   searchInput: {
@@ -88,32 +119,61 @@ const styles = StyleSheet.create({
     height: 40,
     marginLeft: 10,
     fontSize: 16,
+    color: '#fff', // Color del texto del input
   },
-  itemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
+  searchButton: {
+    backgroundColor: '#8a2466',
     padding: 15,
     borderRadius: 10,
-    marginBottom: 10,
-    borderColor: '#ddd',
-    borderWidth: 1,
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  itemTextContainer: {
-    marginLeft: 10,
-    flex: 1,
-  },
-  itemName: {
+  searchButtonText: {
+    color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
   },
-  itemEmail: {
-    color: '#666',
+  tableContainer: {
+    marginTop: 20,
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: '#2F2446',
+    padding: 10,
+    borderRadius: 10,
+  },
+  tableHeaderText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    width: '33%',
+    textAlign: 'center',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 10,
+    backgroundColor: '#8a2466',
+    borderRadius: 10,
+    marginTop: 5,
+  },
+  tableCell: {
+    color: '#fff',
+    width: '33%',
+    textAlign: 'center',
+  },
+  button: {
+    backgroundColor: '#f9a602',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   noResultsText: {
     textAlign: 'center',
-    color: '#666',
+    color: '#fff', // Texto en blanco para resultados vacíos
     marginTop: 20,
   },
 });

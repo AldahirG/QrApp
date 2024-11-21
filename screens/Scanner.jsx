@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, Animated, Easing } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, Alert as RNAlert, ImageBackground } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BASE_URL } from '../config'; // Importing the BASE_URL from config.js
 
 export default function Scanner() {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
-  const [animation] = useState(new Animated.Value(0));
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -17,95 +17,103 @@ export default function Scanner() {
     })();
   }, []);
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  const handleBarCodeScanned = async ({ type, data }) => {
     setScanned(true);
-    Animated.sequence([
-      Animated.timing(animation, {
-        toValue: 1,
-        duration: 500,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }),
-      Animated.timing(animation, {
-        toValue: 0,
-        duration: 500,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }),
-    ]).start(async () => {
+    try {
+      const userId = data; // Assuming the scanned data is the user ID
       const token = await AsyncStorage.getItem('token');
-      const parsedData = JSON.parse(data);
-      navigation.navigate('ShowInfo', { data: parsedData });
-    });
+      const response = await fetch(`${BASE_URL}/api/registros/update/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ asistio: true }),
+      });
+
+      if (response.ok) {
+        RNAlert.alert(
+          "Confirmado",
+          "Asistencia confirmada exitosamente.",
+          [
+            { text: "OK", onPress: () => setScanned(false) }
+          ],
+          { cancelable: false }
+        );
+      } else {
+        RNAlert.alert("Error", "No se pudo actualizar la asistencia.");
+        setScanned(false);
+      }
+    } catch (error) {
+      RNAlert.alert("Error", "Hubo un error durante la actualización.");
+      setScanned(false);
+    }
   };
 
   if (hasPermission === null) {
-    return <Text>Permisos de Cámara</Text>;
+    return <Text>Solicitando permiso para la cámara...</Text>;
   }
   if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
+    return <Text>No se tiene acceso a la cámara</Text>;
   }
 
-  const animatedStyle = {
-    transform: [
-      {
-        scale: animation.interpolate({
-          inputRange: [0, 1],
-          outputRange: [1, 1.2],
-        }),
-      },
-    ],
-  };
-
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>QR de Asistencia</Text>
+    <ImageBackground
+      source={require('../assets/banner.jpg')} // Importing the banner image as background
+      style={styles.background}
+    >
+      <View style={styles.container}>
+        <Text style={styles.headerText}>Escanear Código QR</Text>
+        <View style={styles.qrContainer}>
+          <BarCodeScanner
+            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+            style={StyleSheet.absoluteFillObject}
+          />
+        </View>
+        {scanned && (
+          <TouchableOpacity style={styles.button} onPress={() => setScanned(false)}>
+            <Text style={styles.buttonText}>Toca para escanear de nuevo</Text>
+          </TouchableOpacity>
+        )}
       </View>
-      <Animated.View style={[styles.qrContainer, animatedStyle]}>
-        <BarCodeScanner
-          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-          style={StyleSheet.absoluteFillObject}
-        />
-      </Animated.View>
-      {scanned && (
-        <TouchableOpacity style={styles.button} onPress={() => setScanned(false)}>
-          <Text style={styles.buttonText}>Tap to Scan Again</Text>
-        </TouchableOpacity>
-      )}
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    resizeMode: 'cover', // Ensures the background covers the entire view
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   container: {
     flex: 1,
-    backgroundColor: "#F0F8FF",
     justifyContent: "center",
     alignItems: "center",
-  },
-  header: {
-    position: "absolute",
-    top: 60,
-    alignItems: "center",
+    padding: 20,
   },
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "black",
+    color: "#f9a602", // Bright orange/yellow color for the header text
+    marginBottom: 20,
+    textAlign: 'center',
   },
   qrContainer: {
-    width: 250,
-    height: 250,
+    width: 300,
+    height: 300,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
+    overflow: 'hidden',
+    borderColor: '#8a2466', // Border color matching the theme
+    borderWidth: 2,
   },
   button: {
-    position: "absolute",
-    bottom: 60,
-    backgroundColor: "#800080",
+    marginTop: 20,
+    backgroundColor: "#8a2466", // Purple color for the button
     borderRadius: 25,
     paddingVertical: 10,
     paddingHorizontal: 40,
