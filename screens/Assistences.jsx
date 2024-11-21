@@ -103,28 +103,28 @@ const Assistences = () => {
 
   const renderAssistanceItem = ({ item }) => (
     <View style={styles.row}>
-      <Text style={styles.cell}>{item.invito || 'Ninguno'}</Text>
+      <Text style={styles.cell}>{item.promotor}</Text>
       <Text style={[styles.cell, styles.cellRight]}>{item.total}</Text>
     </View>
   );
 
   const renderConfirmedAssistanceItem = ({ item }) => (
     <View style={styles.row}>
-      <Text style={styles.cell}>{item.invito || 'Ninguno'}</Text>
+      <Text style={styles.cell}>{item.promotor }</Text>
       <Text style={[styles.cell, styles.cellRight]}>{item.total}</Text>
     </View>
   );
 
   const renderAssistanceByProgramaItem = ({ item }) => (
     <View style={styles.row}>
-      <Text style={styles.cell}>{item.programa || 'Ninguno'}</Text>
+      <Text style={styles.cell}>{item.programa }</Text>
       <Text style={[styles.cell, styles.cellRight]}>{item.total}</Text>
     </View>
   );
 
   const renderAssistanceByEnteroEventoItem = ({ item }) => (  // Nuevo render para el campo "comoEnteroEvento"
     <View style={styles.row}>
-      <Text style={styles.cell}>{item.comoEnteroEvento || 'Ninguno'}</Text>
+      <Text style={styles.cell}>{item.comoEnteroEvento }</Text>
       <Text style={[styles.cell, styles.cellRight]}>{item.total}</Text>
     </View>
   );
