@@ -9,87 +9,174 @@ import moment from 'moment';
 
 const Register = () => {
   const [nombre, setNombre] = useState('');
-  const [telefono, setTelefono] = useState('');
   const [correo, setCorreo] = useState('');
-  const [edad, setEdad] = useState('');
-  const [escuelaProcedencia, setEscuelaProcedencia] = useState('');
-  const [programa, setPrograma] = useState('');
-  const [comoEnteroEvento, setComoEnteroEvento] = useState('');
-  const [invito, setInvito] = useState('');
-  const [disfraz, setDisfraz] = useState(''); // Estado para el nuevo select "¿Participarás en el concurso de disfraces?"
+  const [telefono, setTelefono] = useState('');
+  const [nivelEstudios, setNivelEstudios] = useState('');
+  const [nombreInvito, setNombreInvito] = useState('');
+  const [alumno, setAlumno] = useState('');
+  const [tipo] = useState('SESIÓN INFORMATIVA');
+  const [escProc, setEscProc] = useState('');
+  const [nivelUninter, setNivelUninter] = useState('');
+  const [programaInteres, setProgramaInteres] = useState('');
+  const [asistio, setAsistio] = useState('');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 
+  const conferencista = 'ONE DAY UNINTER NOVIEMBRE 2024';
+
+  const getProgramOptions = () => {
+    switch (nivelEstudios) {
+      case 'SECUNDARIA':
+        return ['SIU MULTICULTURAL', 'SIU BILINGÜE'];
+      case 'BACHILLERATO':
+        return ['BIU MULTICULTURAL', 'BIU BILINGÜE'];
+      case 'UNIVERSIDAD':
+        return [
+          'Psicología (LPS)',
+          'Derecho (LED)',
+          'Pedagogía (LPE)',
+          'Ciencias Políticas y Gestión Pública (LCP)',
+          'Relaciones Internacionales (LRI)',
+          'Relaciones Internacionales y Economía (RIEC)',
+          'Relaciones Internacionales y Ciencias Políticas (RICP)',
+          'Idiomas (LID)',
+          'Comunicación (LCO)',
+          'Comunicación y Relaciones Públicas (CORP)',
+          'Comercio Exterior (LCE)',
+          'Economía y Finanzas (LEF)',
+          'Mercadotecnia (LEM)',
+          'Mercadotecnia y Publicidad (LEMP)',
+          'Psicología Organizacional (LPO)',
+          'Administración de Empresas Turísticas (LAET)',
+          'Administración de Empresas (LAE)',
+          'Administración de Negocios Internacionales (LANI)',
+          'Administración Pública (LAP)',
+          'Administración y Mercadotecnia (LAM)',
+          'Diseño de Modas y Tendencias Internacionales (LDM)',
+          'Diseño Industrial (LDI)',
+          'Diseño Gráfico (LDG)',
+          'Animación y Diseño Digital (LADD)',
+          'Arquitectura (ARQ)',
+          'Civil (ICI)',
+          'Mecatrónica (IME)',
+          'Mecánica Industrial (IMI)',
+          'Industrial y de Sistemas de Calidad (IISCA)',
+          'Sistemas Computacionales (ISC)',
+          'Ambiental (IAM)',
+          'Gestión Empresarial (LEGE)',
+          'Mercadotecnia (LEMK)',
+          'Administración de Negocios Internacionales (LEANI)',
+          'Mercadotecnia y Publicidad (LEMKP)',
+          'Comercio Exterior (LECE)',
+      ];      
+      case 'POSGRADO':
+        return [
+          'Maestría en Administración y Dirección de Empresas (MADE)',
+          'Especialidad en Marketing Digital (EMD)',
+          'Doctorado en Administración',
+          'Especialidad en Criminalística (EC)',
+          'Especialidad en Relaciones Mercantiles Internacionales (ERMI)',
+          'Especialidad en Promoción Turística (EPT)',
+          'Especialidad en Publicidad (EPU)',
+          'Especialidad en Administración de la Tecnología en Línea (EATL)',
+          'Especialidad en Administración de Obra (EAO)',
+          'Especialidad en Animación y Post-Producción Digital (EAPD)',
+          'Maestría en Línea de Administración y Dirección de Empresas (MADEL)',
+          'Maestría en Administración con Especialidad en Negocios Internacionales (MAD)',
+          'Maestría en Alta Dirección (MADIR)',
+          'Maestría en Finanzas Corporativas (MFC)',
+          'Maestría en Gestión de la Calidad (MGC)',
+          'Maestría en Gestión del Factor y Capital Humano (MGFH)',
+          'Maestría en Impuestos (MI)',
+          'Maestría en Mercadotecnia Global (MMG)',
+          'Maestría en Educación en Formación Docente (MEFD)',
+          'Maestría en Enseñanza de Lenguas Extranjeras (MEL)',
+          'Maestría en Redes de Computadoras y Tecnologías WEB (MARET)',
+          'Doctorado en Humanidades',
+      ];      
+      default:
+        return [];
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!nombre || !telefono || !invito) {
+    if (!nombre || !correo || !telefono || !nivelEstudios || !nombreInvito || !alumno || !asistio) {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: 'Nombre, teléfono y quien invitó son obligatorios.',
+        text2: 'Por favor, completa todos los campos obligatorios.',
       });
       return;
     }
-
+  
     setLoading(true);
     try {
       const token = await AsyncStorage.getItem('token');
+      const payload = {
+        nombre: nombre.trim(), // Asegura que no haya espacios en blanco
+        correo: correo.trim().toLowerCase(), // Normaliza el correo
+        telefono: telefono.trim(),
+        Nivel_Estudios: nivelEstudios,
+        Conferencista: conferencista,
+        Nombre_invito: nombreInvito,
+        fecha_registro: moment().toISOString(),
+        alumno,
+        tipo,
+        escProc,
+        NivelUninter: nivelUninter,
+        programaInteres,
+        asistio,
+      };
+  
+      console.log('Payload enviado:', payload); // Para depurar el payload
+  
       const response = await fetch(`${BASE_URL}/api/registros/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          nombre,
-          telefono,
-          correo,
-          edad,
-          escuelaProcedencia,
-          programa,
-          comoEnteroEvento,
-          invito,
-          disfraz, // Agregar este nuevo campo a la solicitud
-          asistio: true,
-          fechaRegistro: moment().toISOString(),
-        }),
+        body: JSON.stringify(payload),
       });
-
+  
       const result = await response.json();
+  
       if (response.ok) {
         Toast.show({
           type: 'success',
           text1: 'Registro creado exitosamente',
         });
-
+  
         // Limpiar formulario
         setNombre('');
-        setTelefono('');
         setCorreo('');
-        setEdad('');
-        setEscuelaProcedencia('');
-        setPrograma('');
-        setComoEnteroEvento('');
-        setInvito('');
-        setDisfraz('');
-
+        setTelefono('');
+        setNivelEstudios('');
+        setNombreInvito('');
+        setAlumno('');
+        setEscProc('');
+        setNivelUninter('');
+        setProgramaInteres('');
+        setAsistio('');
+  
         setTimeout(() => {
           navigation.navigate('Home');
         }, 2000);
       } else {
+        console.error('Error del servidor:', result);
         alert('Error al crear el registro');
       }
     } catch (error) {
+      console.error('Error en la solicitud:', error);
       alert('Error en la solicitud');
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
-    <ImageBackground
-      source={require('../assets/banner.jpg')}
-      style={styles.background}
-    >
+    <ImageBackground source={require('../assets/banner.jpg')} style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
         <Image source={require('../assets/HF-LOGO-2024.png')} style={styles.logo} />
         <Text style={styles.header}>Nuevo Registro</Text>
@@ -101,6 +188,18 @@ const Register = () => {
             value={nombre}
             onChangeText={setNombre}
             placeholder="Ingresa el nombre"
+            placeholderTextColor="#ddd"
+          />
+        </View>
+
+        <View style={styles.infoBox}>
+          <Text style={styles.label}>Correo</Text>
+          <TextInput
+            style={styles.input}
+            value={correo}
+            onChangeText={setCorreo}
+            placeholder="Ingresa el correo"
+            keyboardType="email-address"
             placeholderTextColor="#ddd"
           />
         </View>
@@ -119,47 +218,14 @@ const Register = () => {
         </View>
 
         <View style={styles.infoBox}>
-          <Text style={styles.label}>Correo</Text>
-          <TextInput
-            style={styles.input}
-            value={correo}
-            onChangeText={setCorreo}
-            placeholder="Ingresa el correo"
-            keyboardType="email-address"
-            placeholderTextColor="#ddd"
-          />
-        </View>
-
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Edad</Text>
-          <TextInput
-            style={styles.input}
-            value={edad}
-            onChangeText={setEdad}
-            placeholder="Ingresa la edad"
-            keyboardType="numeric"
-            maxLength={2}
-            placeholderTextColor="#ddd"
-          />
-        </View>
-
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Escuela de Procedencia</Text>
-          <TextInput
-            style={styles.input}
-            value={escuelaProcedencia}
-            onChangeText={setEscuelaProcedencia}
-            placeholder="Ingresa la escuela de procedencia"
-            placeholderTextColor="#ddd"
-          />
-        </View>
-
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>Grado</Text>
+          <Text style={styles.label}>Nivel de Estudios</Text>
           <View style={styles.pickerContainer}>
             <Picker
-              selectedValue={programa}
-              onValueChange={(itemValue) => setPrograma(itemValue)}
+              selectedValue={nivelEstudios}
+              onValueChange={(itemValue) => {
+                setNivelEstudios(itemValue);
+                setProgramaInteres('');
+              }}
               style={styles.input}
             >
               <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
@@ -171,15 +237,39 @@ const Register = () => {
           </View>
         </View>
 
-        {/* Nuevo campo para "¿Participarás en el concurso de disfraces?" */}
+        {nivelEstudios && (
+          <View style={styles.infoBox}>
+            <Text style={styles.label}>Programa de Interés</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={programaInteres}
+                onValueChange={setProgramaInteres}
+                style={styles.input}
+              >
+                <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
+                {getProgramOptions().map((option) => (
+                  <Picker.Item key={option} label={option} value={option} />
+                ))}
+              </Picker>
+            </View>
+          </View>
+        )}
+
         <View style={styles.infoBox}>
-          <Text style={styles.label}>¿Participarás en el concurso de disfraces?</Text>
+          <Text style={styles.label}>Escuela de Procedencia</Text>
+          <TextInput
+            style={styles.input}
+            value={escProc}
+            onChangeText={setEscProc}
+            placeholder="Ingresa la escuela de procedencia"
+            placeholderTextColor="#ddd"
+          />
+        </View>
+
+        <View style={styles.infoBox}>
+          <Text style={styles.label}>¿Eres alumno Uninter?</Text>
           <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={disfraz}
-              onValueChange={(itemValue) => setDisfraz(itemValue)}
-              style={styles.input}
-            >
+            <Picker selectedValue={alumno} onValueChange={setAlumno} style={styles.input}>
               <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
               <Picker.Item label="SI" value="SI" />
               <Picker.Item label="NO" value="NO" />
@@ -188,23 +278,12 @@ const Register = () => {
         </View>
 
         <View style={styles.infoBox}>
-          <Text style={styles.label}>¿Cómo te enteraste del evento?</Text>
+          <Text style={styles.label}>¿Asistirás al evento?</Text>
           <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={comoEnteroEvento}
-              onValueChange={(itemValue) => setComoEnteroEvento(itemValue)}
-              style={styles.input}
-            >
+            <Picker selectedValue={asistio} onValueChange={setAsistio} style={styles.input}>
               <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
-              <Picker.Item label="REDES SOCIALES" value="Redes sociales" />
-              <Picker.Item label="PÁGINA WEB" value="Página web" />
-              <Picker.Item label="VISITA ESCUELA" value="Visita escuela" />
-              <Picker.Item label="PUBLICIDAD EN CALLE" value="Publicidad en calle" />
-              <Picker.Item label="ME ENVIARON MENSAJE" value="Me enviaron mensaje" />
-              <Picker.Item label="YA LO CONOCÍA" value="Ya lo conocía" />
-              <Picker.Item label="POR INVITACIÓN AMIGO" value="Por invitación amigo" />
-              <Picker.Item label="CORREO" value="Correo" />
-              <Picker.Item label="RADIO" value="Radio" />
+              <Picker.Item label="SI" value="SI" />
+              <Picker.Item label="NO" value="NO" />
             </Picker>
           </View>
         </View>
@@ -212,17 +291,15 @@ const Register = () => {
         <View style={styles.infoBox}>
           <Text style={styles.label}>¿Quién te invitó?</Text>
           <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={invito}
-              onValueChange={(itemValue) => setInvito(itemValue)}
-              style={styles.input}
-            >
+            <Picker selectedValue={nombreInvito} onValueChange={setNombreInvito} style={styles.input}>
               <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
+              <Picker.Item label="NINGUNO DE LOS ANTERIORES" value="NINGUNO" />
               <Picker.Item label="ALUMNO" value="ALUMNO"/>
               <Picker.Item label="ADRIAN MOLINA" value="ADRIAN MOLINA" />
               <Picker.Item label="ALDAHIR GOMEZ" value="ALDAHIR GOMEZ" />
               <Picker.Item label="ANALIT ROMÁN ARCE" value="ANALIT ROMÁN ARCE" />
               <Picker.Item label="ANALY ORTEGA" value="ANALY ORTEGA" />
+              <Picker.Item label="ALEJANDRA RIVAS" value="ALEJANDRA RIVAS" />
               <Picker.Item label="ANGÉLICA NIETO" value="ANGÉLICA NIETO" />
               <Picker.Item label="BRYAN MURGA" value="BRYAN MURGA" />
               <Picker.Item label="CÉSAR SANTA OLALLA" value="CÉSAR SANTA OLALLA" />
@@ -236,7 +313,6 @@ const Register = () => {
               <Picker.Item label="RAUL CASTILLEJA" value="RAUL CASTILLEJA" />
               <Picker.Item label="XIMENA MARTÍNEZ" value="XIMENA MARTÍNEZ" />
               <Picker.Item label="YANIN VAZQUEZ" value="YANIN VAZQUEZ" />
-              <Picker.Item label="NINGUNO DE LOS ANTERIORES" value="NINGUNO" />
             </Picker>
           </View>
         </View>
@@ -252,6 +328,8 @@ const Register = () => {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#f8f9fa', // Fondo claro para toda la vista
   },
   container: {
     flexGrow: 1,
@@ -266,50 +344,68 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#f9a602',
+    color: '#343a40', // Texto oscuro para encabezado
     marginBottom: 20,
     textAlign: 'center',
   },
   infoBox: {
     marginBottom: 15,
+    backgroundColor: '#ffffff', // Fondo blanco para el contenedor de cada campo
+    borderRadius: 10,
+    padding: 10,
+    borderColor: '#dee2e6', // Borde gris claro para separación visual
+    borderWidth: 1,
+    elevation: 1, // Sombra ligera para darle profundidad
   },
   label: {
     fontSize: 16,
-    color: '#fff',
+    color: '#495057', // Texto gris oscuro para etiquetas
     marginBottom: 5,
+    fontWeight: '500',
   },
   input: {
     height: 40,
-    borderColor: '#f9a602',
+    borderColor: '#dee2e6', // Gris claro para bordes de input
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 10,
-    backgroundColor: '#8a2466',
-    color: '#fff',
+    backgroundColor: '#ffffff', // Fondo blanco para inputs
+    color: '#343a40', // Texto oscuro para inputs
+    fontSize: 14,
   },
   pickerContainer: {
-    borderColor: '#f9a602',
-    borderWidth: 0, 
-    borderRadius: 10,
-    backgroundColor: '#8a2466', 
+    borderWidth: 0, // Eliminamos el borde externo
+    borderRadius: 8, // Redondeamos las esquinas
+    backgroundColor: '#ffffff', // Fondo blanco
     justifyContent: 'center',
     height: 40,
+    paddingHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2, // Sombra ligera para darle profundidad
   },
-  picker: {
-    color: '#fff', // Elimina el borde gris interno
-    backgroundColor: '#8a2466', // Asegúrate de que no haya fondo adicional
-  },
+  
+  
   button: {
     marginTop: 20,
-    backgroundColor: '#8a2466',
+    backgroundColor: '#007bff', // Azul moderno para botones
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 8,
     alignItems: 'center',
+    shadowColor: '#000', // Sombra para darle profundidad
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   buttonText: {
-    color: '#fff',
+    color: '#ffffff', // Texto blanco para botones
     fontSize: 16,
+    fontWeight: 'bold',
   },
 });
+
 
 export default Register;

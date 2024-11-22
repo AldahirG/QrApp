@@ -8,54 +8,53 @@ import Toast from 'react-native-toast-message';
 import { BASE_URL } from '../config';
 
 const ShowInfo = ({ route }) => {
-  const { data } = route.params; 
+  const { data } = route.params;
   const [loading, setLoading] = useState(false);
-  const [nombre, setNombre] = useState(data.nombre || ''); 
+  const [nombre, setNombre] = useState(data.nombre || '');
   const [correo, setCorreo] = useState(data.correo || '');
   const [telefono, setTelefono] = useState(data.telefono || '');
-  const [programa, setPrograma] = useState(data.programa || '');  // Grado en lugar de Programa
-  const [disfraz, setDisfraz] = useState(data.disfraz || '');  // Participar en el concurso de disfraces
+  const [programa, setPrograma] = useState(data.programa || '');
+  const [disfraz, setDisfraz] = useState(data.disfraz || '');
   const [nombreInvito, setNombreInvito] = useState(data.invito || '');
-  const [fechaRegistro, setFechaRegistro] = useState(data.fechaRegistro ? moment(data.fechaRegistro).format('DD/MM/YYYY') : '');
+  const [fechaRegistro, setFechaRegistro] = useState(
+    data.fechaRegistro ? moment(data.fechaRegistro).format('DD/MM/YYYY') : ''
+  );
   const [asistio, setAsistio] = useState(data.asistio ? 'SI' : 'NO');
-  const [comoEnteroEvento, setComoEnteroEvento] = useState(data.comoEnteroEvento || '');
   const navigation = useNavigation();
 
   const confirmAttendance = async () => {
     setLoading(true);
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/api/registros/update/${data.idhalloweenfest_registro}`, { 
+      const response = await fetch(`${BASE_URL}/api/registros/update/${data.idhalloweenfest_registro}`, {
         method: 'PUT',
-        // headers: {
-        //   'Content-Type': 'application/json',
-        //   'Authorization': `Bearer ${token}`
-        // },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           nombre,
           correo,
           telefono,
-          programa,  // Grado
-          disfraz,  // Participar en el concurso de disfraces
-          invito: nombreInvito,  // Quien te invitó
-          fechaRegistro: moment(fechaRegistro, 'DD/MM/YYYY').toISOString(),  // Fecha de registro
+          programa,
+          disfraz,
+          invito: nombreInvito,
+          fechaRegistro: moment(fechaRegistro, 'DD/MM/YYYY').toISOString(),
           asistio: asistio === 'SI' ? 1 : 0,
-          comoEnteroEvento,  // Cómo se enteró
-        })
+        }),
       });
-
-      const result = await response.json();
 
       if (response.ok) {
         Toast.show({
           type: 'success',
-          text1: 'Asistencia confirmada',
+          text1: 'Actualización exitosa',
+          text2: 'La asistencia fue confirmada correctamente.',
         });
         setTimeout(() => {
           navigation.navigate('Home');
         }, 2000);
       } else {
-        Alert.alert('Error', result.message || 'Error en la actualización');
+        throw new Error('Error al actualizar el registro.');
       }
     } catch (error) {
       Alert.alert('Error', error.message);
@@ -65,141 +64,76 @@ const ShowInfo = ({ route }) => {
   };
 
   return (
-    <ImageBackground
-      source={require('../assets/banner.jpg')}
-      style={styles.background}
-    >
+    <ImageBackground source={require('../assets/banner.jpg')} style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.header}>Información de Registro</Text>
 
-        {/* Campo Nombre */}
         <View style={styles.infoBox}>
           <Text style={styles.label}>Nombre</Text>
           <TextInput style={styles.input} value={nombre} editable={false} />
         </View>
 
-        {/* Campo Teléfono */}
         <View style={styles.infoBox}>
           <Text style={styles.label}>Teléfono</Text>
           <TextInput style={styles.input} value={telefono} editable={telefono === ''} onChangeText={setTelefono} />
         </View>
 
-        {/* Campo Correo */}
         <View style={styles.infoBox}>
           <Text style={styles.label}>Correo</Text>
           <TextInput style={styles.input} value={correo} editable={correo === ''} onChangeText={setCorreo} />
         </View>
 
-        {/* Campo Programa (Grado) */}
         <View style={styles.infoBox}>
           <Text style={styles.label}>Programa</Text>
-          {programa ? (
-            <TextInput style={styles.input} value={programa} editable={false} />
-          ) : (
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={programa}
-                onValueChange={(itemValue) => setPrograma(itemValue)}
-                style={styles.picker}
-              >
-                <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
-                <Picker.Item label="SECUNDARIA" value="SECUNDARIA" />
-                <Picker.Item label="BACHILLERATO" value="BACHILLERATO" />
-                <Picker.Item label="UNIVERSIDAD" value="UNIVERSIDAD" />
-                <Picker.Item label="POSGRADO" value="POSGRADO" />
-              </Picker>
-            </View>
-          )}
+          <TextInput style={styles.input} value={programa} editable={false} />
         </View>
 
-        {/* Campo Disfraz (Participar en el concurso de disfraces) */}
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>¿Participarás en el concurso de disfraces?</Text>
-          {disfraz ? (
-            <TextInput style={styles.input} value={disfraz} editable={false} />
-          ) : (
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={disfraz}
-                onValueChange={(itemValue) => setDisfraz(itemValue)}
-                style={styles.picker}
-              >
-                <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
-                <Picker.Item label="SI" value="SI" />
-                <Picker.Item label="NO" value="NO" />
-              </Picker>
-            </View>
-          )}
-        </View>
-
-        {/* Campo Nombre de quien invitó */}
         <View style={styles.infoBox}>
           <Text style={styles.label}>¿Quién te invitó?</Text>
-          {nombreInvito ? (
-            <TextInput style={styles.input} value={nombreInvito} editable={false} />
-          ) : (
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={nombreInvito}
-                onValueChange={(itemValue) => setNombreInvito(itemValue)}
-                style={styles.picker}
-              >
-                <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
-                <Picker.Item label="SECUNDARIA" value="SECUNDARIA" />
-                <Picker.Item label="BACHILLERATO" value="BACHILLERATO" />
-                <Picker.Item label="UNIVERSIDAD" value="UNIVERSIDAD" />
-                <Picker.Item label="POSGRADO" value="POSGRADO" />
-              </Picker>
-            </View>
-          )}
+          <View style={styles.pickerContainer}>
+            <Picker selectedValue={nombreInvito} onValueChange={setNombreInvito} style={styles.input}>
+              <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
+              <Picker.Item label="NINGUNO DE LOS ANTERIORES" value="NINGUNO" />
+              <Picker.Item label="ALUMNO" value="ALUMNO"/>
+              <Picker.Item label="ADRIAN MOLINA" value="ADRIAN MOLINA" />
+              <Picker.Item label="ALDAHIR GOMEZ" value="ALDAHIR GOMEZ" />
+              <Picker.Item label="ANALIT ROMÁN ARCE" value="ANALIT ROMÁN ARCE" />
+              <Picker.Item label="ANALY ORTEGA" value="ANALY ORTEGA" />
+              <Picker.Item label="ALEJANDRA RIVAS" value="ALEJANDRA RIVAS" />
+              <Picker.Item label="ANGÉLICA NIETO" value="ANGÉLICA NIETO" />
+              <Picker.Item label="BRYAN MURGA" value="BRYAN MURGA" />
+              <Picker.Item label="CÉSAR SANTA OLALLA" value="CÉSAR SANTA OLALLA" />
+              <Picker.Item label="EMMANUEL MONTES DE OCA" value="EMMANUEL MONTES DE OCA" />
+              <Picker.Item label="JESÚS GUZMÁN" value="JESÚS GUZMÁN" />
+              <Picker.Item label="JESUS TRILLO" value="JESUS TRILLO" />
+              <Picker.Item label="KEREN GOMEZ" value="KEREN GOMEZ" />
+              <Picker.Item label="MELYSSA MONRROY" value="MELYSSA MONRROY" />
+              <Picker.Item label="MARCO SALGADO" value="MARCO SALGADO" />
+              <Picker.Item label="NORMAN HERNANDEZ" value="NORMAN HERNANDEZ" />
+              <Picker.Item label="RAUL CASTILLEJA" value="RAUL CASTILLEJA" />
+              <Picker.Item label="XIMENA MARTÍNEZ" value="XIMENA MARTÍNEZ" />
+              <Picker.Item label="YANIN VAZQUEZ" value="YANIN VAZQUEZ" />
+            </Picker>
+          </View>
         </View>
 
-        {/* Campo Fecha de Registro */}
         <View style={styles.infoBox}>
           <Text style={styles.label}>Fecha de Registro</Text>
           <TextInput style={styles.input} value={fechaRegistro} editable={false} />
         </View>
 
-        {/* Campo ¿Asistió? */}
         <View style={styles.infoBox}>
           <Text style={styles.label}>¿Asistió?</Text>
           <View style={styles.pickerContainer}>
             <Picker
               selectedValue={asistio}
               onValueChange={(itemValue) => setAsistio(itemValue)}
-              style={styles.picker}
+              style={styles.input}
             >
               <Picker.Item label="SI" value="SI" />
               <Picker.Item label="NO" value="NO" />
             </Picker>
           </View>
-        </View>
-
-        {/* Campo ¿Cómo te enteraste del evento? */}
-        <View style={styles.infoBox}>
-          <Text style={styles.label}>¿Cómo te enteraste del evento?</Text>
-          {comoEnteroEvento ? (
-            <TextInput style={styles.input} value={comoEnteroEvento} editable={false} />
-          ) : (
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={comoEnteroEvento}
-                onValueChange={(itemValue) => setComoEnteroEvento(itemValue)}
-                style={styles.picker}
-              >
-                <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
-                <Picker.Item label="REDES SOCIALES" value="Redes sociales" />
-                <Picker.Item label="PÁGINA WEB" value="Página web" />
-                <Picker.Item label="VISITA ESCUELA" value="Visita escuela" />
-                <Picker.Item label="PUBLICIDAD EN CALLE" value="Publicidad en calle" />
-                <Picker.Item label="ME ENVIARON MENSAJE" value="Me enviaron mensaje" />
-                <Picker.Item label="YA LO CONOCÍA" value="Ya lo conocía" />
-                <Picker.Item label="POR INVITACIÓN AMIGO" value="Por invitación amigo" />
-                <Picker.Item label="CORREO" value="Correo" />
-                <Picker.Item label="RADIO" value="Radio" />
-              </Picker>
-            </View>
-          )}
         </View>
 
         <TouchableOpacity style={styles.button} onPress={confirmAttendance} disabled={loading}>
@@ -217,64 +151,69 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     justifyContent: 'center',
+    backgroundColor: '#f8f9fa', // Fondo claro para toda la vista
   },
   container: {
     flexGrow: 1,
     padding: 20,
+    width: '100%',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#f9a602',
-    marginBottom: 20,
+    color: '#343a40', // Texto oscuro para mayor legibilidad
     textAlign: 'center',
+    marginBottom: 20,
   },
   infoBox: {
     marginBottom: 15,
   },
   label: {
     fontSize: 16,
-    color: '#fff',
+    fontWeight: 'bold',
+    color: '#343a40', // Texto oscuro para etiquetas
     marginBottom: 5,
   },
   input: {
     height: 40,
-    borderColor: '#f9a602',
+    borderColor: '#dee2e6', // Gris claro para bordes
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 10,
-    backgroundColor: '#8a2466',
-    color: '#fff',
+    backgroundColor: '#ffffff', // Fondo blanco para inputs
+    color: '#495057', // Texto gris oscuro para mayor contraste
+    fontSize: 14,
   },
   pickerContainer: {
-    borderColor: '#f9a602',
-    borderWidth: 0,
-    borderRadius: 10,
-    backgroundColor: '#8a2466',
+    borderColor: '#dee2e6', // Gris claro para bordes
+    borderWidth: 1,
+    borderRadius: 8,
+    backgroundColor: '#ffffff', // Fondo blanco para selects
     justifyContent: 'center',
     height: 40,
   },
   picker: {
-    color: '#fff',
-    backgroundColor: '#8a2466',
+    color: '#495057', // Texto gris oscuro para selects
+    fontSize: 14,
   },
   button: {
     marginTop: 20,
-    backgroundColor: '#8a2466',
+    backgroundColor: '#007bff', // Azul moderno para botones
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 8,
     alignItems: 'center',
   },
   cancelButton: {
     marginTop: 10,
-    backgroundColor: '#FF0000',
+    backgroundColor: '#dc3545', // Rojo para botón de cancelar
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 8,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: '#ffffff', // Blanco para texto de botones
     fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, Alert as RNAlert, ImageBackground } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity, ImageBackground } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
-import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BASE_URL } from '../config'; // Importing the BASE_URL from config.js
+import Toast from "react-native-toast-message";
+import { BASE_URL } from '../config';
 
 export default function Scanner() {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
-  const navigation = useNavigation();
 
   useEffect(() => {
     (async () => {
@@ -19,33 +17,44 @@ export default function Scanner() {
 
   const handleBarCodeScanned = async ({ type, data }) => {
     setScanned(true);
+    const conferencista = 'ONE DAY UNINTER NOVIEMBRE 2024';
+
     try {
-      const userId = data; // Assuming the scanned data is the user ID
-      const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/api/registros/update/${userId}`, {
+      // Obtener registro por ID desde el QR
+      const getResponse = await fetch(`${BASE_URL}/api/registros/get/${data}/${encodeURIComponent(conferencista)}`);
+      if (!getResponse.ok) {
+        throw new Error('Error al obtener el registro');
+      }
+      const record = await getResponse.json();
+
+      // Actualizar el registro con "asistio: SI"
+      const updateResponse = await fetch(`${BASE_URL}/api/registros/update/${data}/${encodeURIComponent(conferencista)}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ asistio: true }),
+        body: JSON.stringify({
+          ...record,
+          asistio: 'SI',
+        }),
       });
 
-      if (response.ok) {
-        RNAlert.alert(
-          "Confirmado",
-          "Asistencia confirmada exitosamente.",
-          [
-            { text: "OK", onPress: () => setScanned(false) }
-          ],
-          { cancelable: false }
-        );
-      } else {
-        RNAlert.alert("Error", "No se pudo actualizar la asistencia.");
+      if (updateResponse.ok) {
+        Toast.show({
+          type: 'success',
+          text1: 'Éxito',
+          text2: 'El registro ha sido actualizado correctamente.',
+        });
         setScanned(false);
+      } else {
+        throw new Error('Error al actualizar el registro');
       }
     } catch (error) {
-      RNAlert.alert("Error", "Hubo un error durante la actualización.");
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: error.message,
+      });
       setScanned(false);
     }
   };
@@ -54,12 +63,12 @@ export default function Scanner() {
     return <Text>Solicitando permiso para la cámara...</Text>;
   }
   if (hasPermission === false) {
-    return <Text>No se tiene acceso a la cámara</Text>;
+    return <Text>No se concedió acceso a la cámara</Text>;
   }
 
   return (
     <ImageBackground
-      source={require('../assets/banner.jpg')} // Importing the banner image as background
+      source={require('../assets/banner.jpg')}
       style={styles.background}
     >
       <View style={styles.container}>
@@ -72,10 +81,11 @@ export default function Scanner() {
         </View>
         {scanned && (
           <TouchableOpacity style={styles.button} onPress={() => setScanned(false)}>
-            <Text style={styles.buttonText}>Toca para escanear de nuevo</Text>
+            <Text style={styles.buttonText}>Escanear de nuevo</Text>
           </TouchableOpacity>
         )}
       </View>
+      <Toast />
     </ImageBackground>
   );
 }
@@ -83,7 +93,7 @@ export default function Scanner() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    resizeMode: 'cover', // Ensures the background covers the entire view
+    resizeMode: 'cover',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -96,30 +106,30 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#f9a602", // Bright orange/yellow color for the header text
+    color: "#003DA6", // Azul principal para encabezado
     marginBottom: 20,
     textAlign: 'center',
   },
   qrContainer: {
     width: 300,
     height: 300,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF", // Fondo blanco del lector
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
     overflow: 'hidden',
-    borderColor: '#8a2466', // Border color matching the theme
+    borderColor: '#003DA6', // Azul principal para el borde
     borderWidth: 2,
   },
   button: {
     marginTop: 20,
-    backgroundColor: "#8a2466", // Purple color for the button
+    backgroundColor: "#003DA6", // Púrpura para el botón
     borderRadius: 25,
     paddingVertical: 10,
     paddingHorizontal: 40,
   },
   buttonText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "bold",
   },

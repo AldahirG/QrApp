@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   logo: {
-    width: 200,  // Ajusta el tamaño de tu logo según tus necesidades
-    height: 200,
+    width: 400,  // Ajusta el tamaño de tu logo según tus necesidades
+    height: 400,
   },
 });

@@ -49,18 +49,22 @@ function MyTabs() {
 
           return <Icon name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#FFA500', // Halloween-themed active icon color
-        tabBarInactiveTintColor: '#fff', // Inactive icon color
+        tabBarActiveTintColor: '#007bff', // Azul moderno para el ícono activo
+        tabBarInactiveTintColor: '#6c757d', // Gris neutro para íconos inactivos
         tabBarStyle: {
-          backgroundColor: '#8a2466', // Background color of the tab bar
-          borderTopWidth: 0, // Remove the top border (white line)
+          backgroundColor: '#ffffff', // Fondo blanco limpio para la barra de pestañas
+          borderTopWidth: 1, // Línea superior sutil para separación
+          borderTopColor: '#dee2e6', // Gris claro para la línea superior
+          elevation: 2, // Sombras ligeras para dar profundidad
         },
         headerStyle: {
-          backgroundColor: '#8a2466', // Header background color
-          borderTopWidth: 0, // Remove the top border (white line)
+          backgroundColor: '#f8f9fa', // Fondo claro para el encabezado
+          borderBottomWidth: 1, // Línea inferior sutil para separación
+          borderBottomColor: '#dee2e6', // Gris claro para la línea inferior
+          elevation: 1, // Sombra ligera para resaltar el encabezado
         },
-        headerTintColor: '#FFA500', // Header text color
-        borderTopWidth: 0, // Remove the top border (white line)
+        headerTintColor: '#343a40', // Gris oscuro para el texto del encabezado
+        
       })}
     >
       <Tab.Screen name="Home" component={Home} options={{ title: 'Inicio' }} />

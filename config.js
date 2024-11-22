@@ -1,1 +1,1 @@
-export const BASE_URL = 'https://sicel.com.mx';
+export const BASE_URL = 'http://localhost:443';

@@ -7,20 +7,16 @@ const Assistences = () => {
   const [assistances, setAssistances] = useState([]);
   const [confirmedAssistances, setConfirmedAssistances] = useState([]);
   const [assistancesByPrograma, setAssistancesByPrograma] = useState([]);
-  const [assistancesByEnteroEvento, setAssistancesByEnteroEvento] = useState([]); // Estado para nuevo campo
   const [loading, setLoading] = useState(false);
+
+  const conferencista = 'ONE DAY UNINTER NOVIEMBRE 2024';
 
   const fetchAssistances = async () => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/api/registros/assistances`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await fetch(`${BASE_URL}/api/registros/assistancesByNombreInvito/${encodeURIComponent(conferencista)}`);
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error('Error al obtener asistencias por invitador');
       }
       const data = await response.json();
       setAssistances(data);
@@ -34,14 +30,9 @@ const Assistences = () => {
   const fetchConfirmedAssistances = async () => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/api/registros/confirmedAssistances`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await fetch(`${BASE_URL}/api/registros/confirmedAssistancesByNombreInvito/${encodeURIComponent(conferencista)}`);
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error('Error al obtener asistencias confirmadas');
       }
       const data = await response.json();
       setConfirmedAssistances(data);
@@ -55,14 +46,9 @@ const Assistences = () => {
   const fetchAssistancesByPrograma = async () => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/api/registros/assistancesByPrograma`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await fetch(`${BASE_URL}/api/registros/assistancesByProgramaInteres/${encodeURIComponent(conferencista)}`);
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error('Error al obtener asistencias por programa');
       }
       const data = await response.json();
       setAssistancesByPrograma(data);
@@ -73,58 +59,38 @@ const Assistences = () => {
     }
   };
 
-  const fetchAssistancesByEnteroEvento = async () => {  // Nueva función
-    setLoading(true);
-    try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/api/registros/getAssistancesByEnteroEvento`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      setAssistancesByEnteroEvento(data);  // Guardar los datos del nuevo campo
-    } catch (error) {
-      console.error('Error fetching assistances by entero evento:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSearch = () => {
     fetchAssistances();
     fetchConfirmedAssistances();
     fetchAssistancesByPrograma();
-    fetchAssistancesByEnteroEvento(); // Añadir nueva consulta
   };
+
+  const renderFooter = (data) => (
+    <View style={styles.rowFooter}>
+      <Text style={styles.cellFooter}>Total</Text>
+      <Text style={[styles.cell, styles.cellFooterRight]}>
+        {data.reduce((acc, item) => acc + item.total, 0)}
+      </Text>
+    </View>
+  );
 
   const renderAssistanceItem = ({ item }) => (
     <View style={styles.row}>
-      <Text style={styles.cell}>{item.promotor}</Text>
+      <Text style={styles.cell}>{item.Nombre_invito}</Text>
       <Text style={[styles.cell, styles.cellRight]}>{item.total}</Text>
     </View>
   );
 
   const renderConfirmedAssistanceItem = ({ item }) => (
     <View style={styles.row}>
-      <Text style={styles.cell}>{item.promotor }</Text>
+      <Text style={styles.cell}>{item.Nombre_invito}</Text>
       <Text style={[styles.cell, styles.cellRight]}>{item.total}</Text>
     </View>
   );
 
   const renderAssistanceByProgramaItem = ({ item }) => (
     <View style={styles.row}>
-      <Text style={styles.cell}>{item.programa }</Text>
-      <Text style={[styles.cell, styles.cellRight]}>{item.total}</Text>
-    </View>
-  );
-
-  const renderAssistanceByEnteroEventoItem = ({ item }) => (  // Nuevo render para el campo "comoEnteroEvento"
-    <View style={styles.row}>
-      <Text style={styles.cell}>{item.comoEnteroEvento }</Text>
+      <Text style={styles.cell}>{item.programaInteres}</Text>
       <Text style={[styles.cell, styles.cellRight]}>{item.total}</Text>
     </View>
   );
@@ -144,91 +110,35 @@ const Assistences = () => {
         {/* Asistencias por Invitador */}
         <View style={styles.tableContainer}>
           <Text style={styles.tableHeader}>Asistencias por Invitador</Text>
-          <View style={styles.rowHeader}>
-            <Text style={[styles.cell, styles.headerCell]}>Quien invitó</Text>
-            <Text style={[styles.cell, styles.headerCellRight]}>Total</Text>
-          </View>
           <FlatList
             data={assistances}
             renderItem={renderAssistanceItem}
-            keyExtractor={(item) => item.invito}
-            ListFooterComponent={() => (
-              <View style={styles.rowFooter}>
-                <Text style={styles.cellFooter}>Total general</Text>
-                <Text style={[styles.cell, styles.cellFooterRight]}>
-                  {assistances.reduce((acc, item) => acc + item.total, 0)}
-                </Text>
-              </View>
-            )}
+            keyExtractor={(item) => item.Nombre_invito}
+            ListFooterComponent={() => renderFooter(assistances)}
           />
         </View>
 
-        {/* Total de Asistentes Confirmados */}
+        {/* Asistencias Confirmadas */}
         <View style={styles.tableContainer}>
-          <Text style={styles.tableHeader}>Total de Asistentes Confirmados</Text>
-          <View style={styles.rowHeader}>
-            <Text style={[styles.cell, styles.headerCell]}>Quien invitó</Text>
-            <Text style={[styles.cell, styles.headerCellRight]}>Total</Text>
-          </View>
+          <Text style={styles.tableHeader}>Asistencias Confirmadas</Text>
           <FlatList
             data={confirmedAssistances}
             renderItem={renderConfirmedAssistanceItem}
-            keyExtractor={(item) => item.invito}
-            ListFooterComponent={() => (
-              <View style={styles.rowFooter}>
-                <Text style={styles.cellFooter}>Total general</Text>
-                <Text style={[styles.cell, styles.cellFooterRight]}>
-                  {confirmedAssistances.reduce((acc, item) => acc + item.total, 0)}
-                </Text>
-              </View>
-            )}
+            keyExtractor={(item) => item.Nombre_invito}
+            ListFooterComponent={() => renderFooter(confirmedAssistances)}
           />
         </View>
 
         {/* Asistencias por Programa */}
         <View style={styles.tableContainer}>
-          <Text style={styles.tableHeader}>Registros por Grado</Text>
-          <View style={styles.rowHeader}>
-            <Text style={[styles.cell, styles.headerCell]}>Programa</Text>
-            <Text style={[styles.cell, styles.headerCellRight]}>Total</Text>
-          </View>
+          <Text style={styles.tableHeader}>Asistencias por Programa</Text>
           <FlatList
             data={assistancesByPrograma}
             renderItem={renderAssistanceByProgramaItem}
-            keyExtractor={(item) => item.programa}
-            ListFooterComponent={() => (
-              <View style={styles.rowFooter}>
-                <Text style={styles.cellFooter}>Total general</Text>
-                <Text style={[styles.cell, styles.cellFooterRight]}>
-                  {assistancesByPrograma.reduce((acc, item) => acc + item.total, 0)}
-                </Text>
-              </View>
-            )}
+            keyExtractor={(item) => item.programaInteres}
+            ListFooterComponent={() => renderFooter(assistancesByPrograma)}
           />
         </View>
-
-        {/* Nuevo: Asistencias por como se enteró del evento */}
-        <View style={styles.tableContainer}>
-          <Text style={styles.tableHeader}>Registros por Medio de Entero del Evento</Text>
-          <View style={styles.rowHeader}>
-            <Text style={[styles.cell, styles.headerCell]}>Medio</Text>
-            <Text style={[styles.cell, styles.headerCellRight]}>Total</Text>
-          </View>
-          <FlatList
-            data={assistancesByEnteroEvento}
-            renderItem={renderAssistanceByEnteroEventoItem}
-            keyExtractor={(item) => item.comoEnteroEvento}
-            ListFooterComponent={() => (
-              <View style={styles.rowFooter}>
-                <Text style={styles.cellFooter}>Total general</Text>
-                <Text style={[styles.cell, styles.cellFooterRight]}>
-                  {assistancesByEnteroEvento.reduce((acc, item) => acc + item.total, 0)}
-                </Text>
-              </View>
-            )}
-          />
-        </View>
-
       </ScrollView>
     </ImageBackground>
   );
@@ -238,6 +148,7 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     justifyContent: 'center',
+    backgroundColor: '#f8f9fa', 
   },
   container: {
     flexGrow: 1,
@@ -246,84 +157,73 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#f9a602',
+    color: '#343a40', // Texto oscuro para mayor legibilidad
     marginBottom: 20,
     textAlign: 'center',
   },
   button: {
-    backgroundColor: '#8a2466',
+    backgroundColor: '#007bff', // Azul moderno y minimalista para el botón
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 8,
     alignItems: 'center',
     marginBottom: 20,
   },
   buttonText: {
-    color: '#fff',
+    color: '#ffffff', // Blanco puro para el texto del botón
     fontSize: 16,
+    fontWeight: 'bold',
   },
   tableContainer: {
-    backgroundColor: '#2F2446',
+    backgroundColor: '#ffffff', // Fondo blanco limpio para las tablas
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 20,
-    borderColor: '#f9a602', // Naranja para el borde
-    borderWidth: 2,
+    borderColor: '#dee2e6', 
+    borderWidth: 1,
+    elevation: 2, 
   },
   tableHeader: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    margin: 10,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#495057', 
+    marginVertical: 10,
     textAlign: 'center',
-  },
-  rowHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#2F2446',
-    paddingVertical: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: '#f9a602',
   },
   row: {
     flexDirection: 'row',
     paddingVertical: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: '#f9a602',
+    borderBottomWidth: 1,
+    borderBottomColor: '#dee2e6', 
   },
   rowFooter: {
     flexDirection: 'row',
     paddingVertical: 10,
-    borderTopWidth: 2,
-    borderTopColor: '#f9a602',
-    backgroundColor: '#2F2446',
+    borderTopWidth: 1,
+    borderTopColor: '#dee2e6',
+    backgroundColor: '#e9ecef', 
   },
   cell: {
     flex: 1,
     textAlign: 'left',
     paddingHorizontal: 10,
-    color: '#fff',
+    color: '#495057', 
+    fontSize: 14,
   },
   cellRight: {
     textAlign: 'right',
   },
-  headerCell: {
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  headerCellRight: {
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'right',
-  },
   cellFooter: {
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#212529', 
     paddingHorizontal: 10,
+    fontSize: 14,
   },
   cellFooterRight: {
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#212529',
     textAlign: 'right',
     paddingHorizontal: 10,
+    fontSize: 14,
   },
 });
 
