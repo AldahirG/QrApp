@@ -9,7 +9,7 @@ export default function Home() {
     >
       <View style={styles.container}>
         <Image
-          source={require('../assets/HF-LOGO-2024.png')}  // Tu logo aquí
+          source={require('../assets/uninterlogo.png')}  // Tu logo aquí
           style={styles.logo}
           resizeMode="contain"
         />
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   logo: {
-    width: 400,  // Ajusta el tamaño de tu logo según tus necesidades
-    height: 400,
+    width: 200,  // Ajusta el tamaño de tu logo según tus necesidades
+    height: 200,
   },
 });

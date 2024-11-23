@@ -178,7 +178,7 @@ const Register = () => {
   return (
     <ImageBackground source={require('../assets/banner.jpg')} style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Image source={require('../assets/HF-LOGO-2024.png')} style={styles.logo} />
+        <Image source={require('../assets/uninterlogo.png')} style={styles.logo} />
         <Text style={styles.header}>Nuevo Registro</Text>
 
         <View style={styles.infoBox}>
@@ -336,8 +336,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    width: 250,
-    height: 150,
+    width: 100,
+    height: 100,
     alignSelf: 'center',
     marginBottom: 20,
   },

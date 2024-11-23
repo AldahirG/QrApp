@@ -16,7 +16,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/HF-LOGO-2024.png",
+        "foregroundImage": "./assets/uninterlogoicon.png",
         "backgroundColor": "#ffffff",
         "package":"com.aldahirg.QrApp", 
         "versionCode": 1
