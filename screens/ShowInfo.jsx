@@ -5,7 +5,7 @@ import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
-import { BASE_URL } from '../config';
+import { BASE_URL, CONFERENCISTA_BASE } from '../config';
 
 const ShowInfo = ({ route }) => {
   const { data } = route.params;
@@ -28,7 +28,7 @@ const ShowInfo = ({ route }) => {
     setLoading(true);
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/api/registros/update/${data.idregistro_conferencias}/ONE%20DAY%20UNINTER%20NOVIEMBRE%202024`, {
+      const response = await fetch(`${BASE_URL}/api/registros/update/${data.idregistro_conferencias}/ONE%20DAY%20UNINTER%20DICIEMBRE%202024`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

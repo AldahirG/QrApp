@@ -1,20 +1,19 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, ScrollView, ImageBackground } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BASE_URL } from '../config';
+import { BASE_URL, CONFERENCISTA_BASE } from '../config';
 
 const Assistences = () => {
   const [assistances, setAssistances] = useState([]);
   const [confirmedAssistances, setConfirmedAssistances] = useState([]);
   const [assistancesByPrograma, setAssistancesByPrograma] = useState([]);
+  const [confirmedAssistancesByPrograma, setConfirmedAssistancesByPrograma] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  const conferencista = 'ONE DAY UNINTER NOVIEMBRE 2024';
 
   const fetchAssistances = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/api/registros/assistancesByNombreInvito/${encodeURIComponent(conferencista)}`);
+      const response = await fetch(`${BASE_URL}/api/registros/assistancesByNombreInvito/${encodeURIComponent(CONFERENCISTA_BASE)}`);
       if (!response.ok) {
         throw new Error('Error al obtener asistencias por invitador');
       }
@@ -30,7 +29,7 @@ const Assistences = () => {
   const fetchConfirmedAssistances = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/api/registros/confirmedAssistancesByNombreInvito/${encodeURIComponent(conferencista)}`);
+      const response = await fetch(`${BASE_URL}/api/registros/confirmedAssistancesByNombreInvito/${encodeURIComponent(CONFERENCISTA_BASE)}`);
       if (!response.ok) {
         throw new Error('Error al obtener asistencias confirmadas');
       }
@@ -46,7 +45,7 @@ const Assistences = () => {
   const fetchAssistancesByPrograma = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/api/registros/assistancesByProgramaInteres/${encodeURIComponent(conferencista)}`);
+      const response = await fetch(`${BASE_URL}/api/registros/assistancesByProgramaInteres/${encodeURIComponent(CONFERENCISTA_BASE)}`);
       if (!response.ok) {
         throw new Error('Error al obtener asistencias por programa');
       }
@@ -59,21 +58,56 @@ const Assistences = () => {
     }
   };
 
+  const fetchConfirmedAssistancesByPrograma = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${BASE_URL}/api/registros/assistancesByProgramaInteresConfirmed/${encodeURIComponent(CONFERENCISTA_BASE)}`);
+      if (!response.ok) throw new Error('Error al obtener asistencias confirmadas por programa');
+      const data = await response.json();
+      console.log('Datos recibidos:', data); 
+      setConfirmedAssistancesByPrograma(data);
+    } catch (error) {
+      console.error('Error fetching confirmed assistances by programa:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
   const handleSearch = () => {
     fetchAssistances();
     fetchConfirmedAssistances();
     fetchAssistancesByPrograma();
+    fetchConfirmedAssistancesByPrograma();
   };
 
-  const renderFooter = (data) => (
-    <View style={styles.rowFooter}>
-      <Text style={styles.cellFooter}>Total</Text>
-      <Text style={[styles.cell, styles.cellFooterRight]}>
-        {data.reduce((acc, item) => acc + item.total, 0)}
-      </Text>
-    </View>
-  );
+  const renderFooter = (data) => {
+    const total = data.reduce((acc, item) => acc + (Number(item.cantidad_registros || item.total) || 0), 0);
+  
+    return (
+      <View style={styles.rowFooter}>
+        <Text style={styles.cellFooter}>Total</Text>
+        <Text style={[styles.cell, styles.cellFooterRight]}>{total}</Text>
+      </View>
+    );
+  };
 
+  const renderTotalSum = () => {
+    const totalSum =
+      assistances.reduce((acc, item) => acc + (Number(item.total) || 0), 0) +
+      confirmedAssistances.reduce((acc, item) => acc + (Number(item.total) || 0), 0) +
+      assistancesByPrograma.reduce((acc, item) => acc + (Number(item.cantidad_registros) || 0), 0) +
+      confirmedAssistancesByPrograma.reduce((acc, item) => acc + (Number(item.cantidad_registros) || 0), 0);
+  
+    return (
+      <View style={styles.totalSumContainer}>
+        <Text style={styles.totalSumText}>Suma Total de Registros: {totalSum}</Text>
+      </View>
+    );
+  };
+  
+  
+  
   const renderAssistanceItem = ({ item }) => (
     <View style={styles.row}>
       <Text style={styles.cell}>{item.Nombre_invito}</Text>
@@ -84,7 +118,7 @@ const Assistences = () => {
   const renderConfirmedAssistanceItem = ({ item }) => (
     <View style={styles.row}>
       <Text style={styles.cell}>{item.Nombre_invito}</Text>
-      <Text style={[styles.cell, styles.cellRight]}>{item.total}</Text>
+      <Text style={[styles.cell, styles.cellRight]}>{Number(item.total) || 0}</Text>
     </View>
   );
 
@@ -95,15 +129,20 @@ const Assistences = () => {
     </View>
   );
 
+  const renderConfirmedAssistanceByProgramaItem = ({ item }) => (
+    <View style={styles.row}>
+      <Text style={styles.cell}>{item.programaInteres || 'Sin Programa'}</Text>
+      <Text style={[styles.cell, styles.cellRight]}>{Number(item.cantidad_registros) || 0}</Text>
+    </View>
+  );
+  
+
   return (
-    <ImageBackground
-      source={require('../assets/banner.jpg')}
-      style={styles.background}
-    >
+    <ImageBackground source={require('../assets/banner.jpg')} style={styles.background}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.header}>Reportes</Text>
 
-        <TouchableOpacity style={styles.button} onPress={handleSearch}>
+        <TouchableOpacity style={styles.button} onPress={handleSearch} disabled={loading}>
           <Text style={styles.buttonText}>{loading ? 'Cargando...' : 'Buscar'}</Text>
         </TouchableOpacity>
 
@@ -139,16 +178,32 @@ const Assistences = () => {
             ListFooterComponent={() => renderFooter(assistancesByPrograma)}
           />
         </View>
+
+        {/* Asistencias Confirmadas por Programa */}
+        <View style={styles.tableContainer}>
+  <Text style={styles.tableHeader}>Asistencias Confirmadas por Programa</Text>
+  <FlatList
+    data={confirmedAssistancesByPrograma}
+    renderItem={renderConfirmedAssistanceByProgramaItem}
+    keyExtractor={(item, index) => item.programaInteres || index.toString()}
+    ListFooterComponent={() => renderFooter(confirmedAssistancesByPrograma)}
+  />
+  {confirmedAssistancesByPrograma.length === 0 && (
+    <Text style={styles.noDataText}>No hay asistencias confirmadas por programa disponibles.</Text>
+  )}
+</View>
+
       </ScrollView>
     </ImageBackground>
   );
 };
 
+
 const styles = StyleSheet.create({
   background: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#f8f9fa', 
+    backgroundColor: '#f8f9fa',
   },
   container: {
     flexGrow: 1,
@@ -168,45 +223,69 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
+  buttonDisabled: {
+    backgroundColor: '#6c757d', // Color gris para el botón deshabilitado
+  },
   buttonText: {
     color: '#ffffff', // Blanco puro para el texto del botón
     fontSize: 16,
     fontWeight: 'bold',
   },
+
+  totalSumContainer: {
+    backgroundColor: '#ffffff',
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+    elevation: 2,
+    alignItems: 'center',
+  },
+  totalSumText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#343a40',
+  },
+  
   tableContainer: {
     backgroundColor: '#ffffff', // Fondo blanco limpio para las tablas
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 20,
-    borderColor: '#dee2e6', 
+    borderColor: '#dee2e6',
     borderWidth: 1,
-    elevation: 2, 
+    elevation: 2,
   },
   tableHeader: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#495057', 
+    color: '#495057',
     marginVertical: 10,
     textAlign: 'center',
   },
   row: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingVertical: 10,
+    paddingHorizontal: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#dee2e6', 
+    borderBottomColor: '#dee2e6',
   },
   rowFooter: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingVertical: 10,
+    paddingHorizontal: 10,
     borderTopWidth: 1,
     borderTopColor: '#dee2e6',
-    backgroundColor: '#e9ecef', 
+    backgroundColor: '#e9ecef',
   },
   cell: {
     flex: 1,
     textAlign: 'left',
     paddingHorizontal: 10,
-    color: '#495057', 
+    color: '#495057',
     fontSize: 14,
   },
   cellRight: {
@@ -214,7 +293,7 @@ const styles = StyleSheet.create({
   },
   cellFooter: {
     fontWeight: 'bold',
-    color: '#212529', 
+    color: '#212529',
     paddingHorizontal: 10,
     fontSize: 14,
   },
@@ -224,6 +303,25 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     paddingHorizontal: 10,
     fontSize: 14,
+  },
+  noDataText: {
+    textAlign: 'center',
+    color: '#6c757d',
+    fontSize: 16,
+    marginVertical: 10,
+  },
+  tableTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#212529',
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  loadingText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#007bff',
+    marginBottom: 20,
   },
 });
 

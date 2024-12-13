@@ -4,12 +4,12 @@ import { View, StyleSheet, ImageBackground, Image } from 'react-native';
 export default function Home() {
   return (
     <ImageBackground
-      source={require('../assets/banner.jpg')}  // Fondo de la imagen
+      source={require('../assets/banner.jpg')}
       style={styles.background}
     >
       <View style={styles.container}>
         <Image
-          source={require('../assets/uninterlogo.png')}  // Tu logo aquí
+          source={require('../assets/uninterlogo.png')}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   logo: {
-    width: 200,  // Ajusta el tamaño de tu logo según tus necesidades
+    width: 200, 
     height: 200,
   },
 });

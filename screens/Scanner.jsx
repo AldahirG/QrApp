@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, ImageBackground } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import Toast from "react-native-toast-message";
-import { BASE_URL } from '../config';
+import { BASE_URL, CONFERENCISTA_BASE } from '../config';
 
 export default function Scanner() {
   const [hasPermission, setHasPermission] = useState(null);
@@ -17,18 +17,17 @@ export default function Scanner() {
 
   const handleBarCodeScanned = async ({ type, data }) => {
     setScanned(true);
-    const conferencista = 'ONE DAY UNINTER NOVIEMBRE 2024';
 
     try {
       // Obtener registro por ID desde el QR
-      const getResponse = await fetch(`${BASE_URL}/api/registros/get/${data}/${encodeURIComponent(conferencista)}`);
+      const getResponse = await fetch(`${BASE_URL}/api/registros/get/${data}/${encodeURIComponent(CONFERENCISTA_BASE)}`);
       if (!getResponse.ok) {
         throw new Error('Error al obtener el registro');
       }
       const record = await getResponse.json();
 
       // Actualizar el registro con "asistio: SI"
-      const updateResponse = await fetch(`${BASE_URL}/api/registros/update/${data}/${encodeURIComponent(conferencista)}`, {
+      const updateResponse = await fetch(`${BASE_URL}/api/registros/update/${data}/${encodeURIComponent(CONFERENCISTA_BASE)}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

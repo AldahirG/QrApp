@@ -4,7 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
-import { BASE_URL } from '../config';
+import { BASE_URL, CONFERENCISTA_BASE } from '../config';
 import moment from 'moment';
 
 const Register = () => {
@@ -21,8 +21,6 @@ const Register = () => {
   const [asistio, setAsistio] = useState('');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
-
-  const conferencista = 'ONE DAY UNINTER NOVIEMBRE 2024';
 
   const getProgramOptions = () => {
     switch (nivelEstudios) {
@@ -117,7 +115,7 @@ const Register = () => {
         correo: correo.trim().toLowerCase(), // Normaliza el correo
         telefono: telefono.trim(),
         Nivel_Estudios: nivelEstudios,
-        Conferencista: conferencista,
+        Conferencista: CONFERENCISTA_BASE,
         Nombre_invito: nombreInvito,
         fecha_registro: moment().toISOString(),
         alumno,
@@ -294,6 +292,7 @@ const Register = () => {
             <Picker selectedValue={nombreInvito} onValueChange={setNombreInvito} style={styles.input}>
               <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
               <Picker.Item label="NINGUNO DE LOS ANTERIORES" value="NINGUNO" />
+              <Picker.Item label="PAUTA" value="PAUTA" />
               <Picker.Item label="ALUMNO" value="ALUMNO"/>
               <Picker.Item label="ADRIAN MOLINA" value="ADRIAN MOLINA" />
               <Picker.Item label="ALDAHIR GOMEZ" value="ALDAHIR GOMEZ" />

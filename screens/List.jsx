@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { BASE_URL } from '../config';
+import { BASE_URL, CONFERENCISTA_BASE } from '../config';
 
 const List = () => {
   const [search, setSearch] = useState('');
@@ -29,8 +29,7 @@ const List = () => {
 
   const fetchUsers = async () => {
     try {
-      const conferencista = 'ONE DAY UNINTER NOVIEMBRE 2024';
-      const response = await fetch(`${BASE_URL}/api/registros/getAll/${encodeURIComponent(conferencista)}`);
+      const response = await fetch(`${BASE_URL}/api/registros/getAll/${encodeURIComponent(CONFERENCISTA_BASE)}`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
