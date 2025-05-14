@@ -10,7 +10,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { BASE_URL, CONFERENCISTA_BASE } from '../config';
+
+import { BASE_URL } from '../config';
+import { getEventoSeleccionado } from '../utils/storage';
 
 const List = () => {
   const [search, setSearch] = useState('');
@@ -21,20 +23,26 @@ const List = () => {
   const normalizeText = (text) => {
     return text
       ? text
-          .normalize('NFD') // Normaliza caracteres Unicode
-          .replace(/[\u0300-\u036f]/g, '') // Elimina acentos
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
           .toLowerCase()
-      : ''; // Si `text` es null o undefined, retorna una cadena vacía
+      : '';
   };
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/registros/getAll/${encodeURIComponent(CONFERENCISTA_BASE)}`);
+      const conferencista = await getEventoSeleccionado();
+      if (!conferencista) return;
+
+      const response = await fetch(
+        `${BASE_URL}/api/registros?conferencista=${encodeURIComponent(conferencista)}`
+      );
+
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
+
       const data = await response.json();
-      console.log('Usuarios devueltos:', data); // Verifica qué propiedades existen
       setUsers(data);
     } catch (error) {
       console.error('Error fetching users:', error);
