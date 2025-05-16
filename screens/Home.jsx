@@ -5,6 +5,7 @@ import moment from 'moment';
 
 import { BASE_URL } from '../config';
 import { setEventoSeleccionado } from '../utils/storage';
+import { useThemeColors } from '../theme/colors';
 
 import Loader from '../components/Loader';
 import CustomButton from '../components/CustomButton';
@@ -15,6 +16,8 @@ export default function Home({ navigation }) {
   const [eventos, setEventos] = useState([]);
   const [conferencista, setConferencista] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const colors = useThemeColors();
 
   useEffect(() => {
     fetch(`${BASE_URL}/api/registros/eventos/por-mes?mes=${mes}`)
@@ -46,8 +49,8 @@ export default function Home({ navigation }) {
   if (loading) return <Loader />;
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Selecciona el evento activo</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.title, { color: colors.text }]}>Selecciona el evento activo</Text>
 
       {eventos.length === 0 ? (
         <EmptyState message="No hay eventos disponibles para este mes." />
@@ -55,13 +58,15 @@ export default function Home({ navigation }) {
         <Picker
           selectedValue={conferencista}
           onValueChange={setConferencista}
-          style={styles.picker}
+          style={[styles.picker, { color: colors.text, backgroundColor: colors.card }]}
+          dropdownIconColor={colors.text}
         >
           {eventos.map((evento, index) => (
             <Picker.Item
               key={index}
               label={evento.Conferencista}
               value={evento.Conferencista}
+              color={colors.text}
             />
           ))}
         </Picker>
@@ -73,8 +78,22 @@ export default function Home({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, justifyContent: 'center' },
-  title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
-  picker: { backgroundColor: '#fff', borderRadius: 6, marginBottom: 30 },
-  button: { marginTop: 10 },
+  container: {
+    flex: 1,
+    padding: 24,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  picker: {
+    borderRadius: 6,
+    marginBottom: 30,
+  },
+  button: {
+    marginTop: 10,
+  },
 });

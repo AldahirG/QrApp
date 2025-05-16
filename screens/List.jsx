@@ -13,12 +13,14 @@ import { useNavigation } from '@react-navigation/native';
 
 import { BASE_URL } from '../config';
 import { getEventoSeleccionado } from '../utils/storage';
+import { useThemeColors } from '../theme/colors';
 
 const List = () => {
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const navigation = useNavigation();
+  const colors = useThemeColors();
 
   const normalizeText = (text) => {
     return text
@@ -38,9 +40,7 @@ const List = () => {
         `${BASE_URL}/api/registros?conferencista=${encodeURIComponent(conferencista)}`
       );
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+      if (!response.ok) throw new Error('Network response was not ok');
 
       const data = await response.json();
       setUsers(data);
@@ -61,40 +61,68 @@ const List = () => {
   return (
     <ImageBackground
       source={require('../assets/banner.jpg')}
-      style={styles.background}
+      style={[styles.background, { backgroundColor: colors.background }]}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.header}>Registros</Text>
+        <Text style={[styles.header, { color: colors.text }]}>Registros</Text>
 
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#FFFFFF" />
+        <View
+          style={[
+            styles.searchContainer,
+            {
+              backgroundColor: colors.card,
+              borderColor: colors.border,
+            },
+          ]}
+        >
+          <Ionicons name="search" size={20} color={colors.mutedText} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.text }]}
             placeholder="Buscar usuarios"
             value={search}
             onChangeText={setSearch}
-            placeholderTextColor="#F0F0F0"
+            placeholderTextColor={colors.placeholder}
           />
         </View>
 
-        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+        <TouchableOpacity
+          style={[styles.searchButton, { backgroundColor: colors.primary }]}
+          onPress={handleSearch}
+        >
           <Text style={styles.searchButtonText}>Buscar</Text>
         </TouchableOpacity>
 
         {showResults && (
           filteredUsers.length > 0 ? (
-            <View style={styles.tableContainer}>
-              <View style={styles.tableHeader}>
-                <Text style={styles.tableHeaderText}>Nombre</Text>
-                <Text style={styles.tableHeaderText}>Teléfono</Text>
-                <Text style={styles.tableHeaderText}>Acciones</Text>
+            <View
+              style={[
+                styles.tableContainer,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <View
+                style={[styles.tableHeader, { backgroundColor: colors.header }]}
+              >
+                <Text style={[styles.tableHeaderText, { color: colors.text }]}>Nombre</Text>
+                <Text style={[styles.tableHeaderText, { color: colors.text }]}>Teléfono</Text>
+                <Text style={[styles.tableHeaderText, { color: colors.text }]}>Acciones</Text>
               </View>
               {filteredUsers.map((user) => (
-                <View key={user.idregistro_conferencias} style={styles.tableRow}>
-                  <Text style={styles.tableCell}>{user?.nombre || 'Sin nombre'}</Text>
-                  <Text style={styles.tableCell}>{user?.telefono || 'Sin teléfono'}</Text>
+                <View
+                  key={user.idregistro_conferencias}
+                  style={[styles.tableRow, { borderBottomColor: colors.border }]}
+                >
+                  <Text style={[styles.tableCell, { color: colors.text }]}>
+                    {user?.nombre || 'Sin nombre'}
+                  </Text>
+                  <Text style={[styles.tableCell, { color: colors.text }]}>
+                    {user?.telefono || 'Sin teléfono'}
+                  </Text>
                   <TouchableOpacity
-                    style={styles.button}
+                    style={[styles.button, { backgroundColor: colors.primary }]}
                     onPress={() => navigation.navigate('ShowInfo', { data: user })}
                   >
                     <Text style={styles.buttonText}>Ver</Text>
@@ -103,7 +131,9 @@ const List = () => {
               ))}
             </View>
           ) : (
-            <Text style={styles.noResultsText}>No se encontraron usuarios</Text>
+            <Text style={[styles.noResultsText, { color: colors.mutedText }]}>
+              No se encontraron usuarios
+            </Text>
           )
         )}
       </ScrollView>
@@ -115,7 +145,6 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#f8f9fa', // Fondo claro para toda la vista
   },
   container: {
     flexGrow: 1,
@@ -125,58 +154,49 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#343a40', // Texto oscuro para mayor legibilidad
     textAlign: 'center',
     marginBottom: 20,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff', // Fondo blanco limpio para el contenedor de búsqueda
     borderRadius: 30,
     paddingHorizontal: 10,
     paddingVertical: 5,
     marginBottom: 20,
-    borderColor: '#dee2e6', // Gris claro para el borde
     borderWidth: 1,
-    elevation: 1, // Sombra ligera para el campo de búsqueda
+    elevation: 1,
   },
   searchInput: {
     flex: 1,
     height: 40,
     marginLeft: 10,
     fontSize: 16,
-    color: '#343a40', // Texto oscuro para entrada de búsqueda
   },
   searchButton: {
-    backgroundColor: '#007bff', // Azul moderno para el botón
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 20,
   },
   searchButtonText: {
-    color: '#ffffff', // Blanco para el texto del botón
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
   },
   tableContainer: {
-    backgroundColor: '#ffffff', // Fondo blanco limpio para las tablas
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 20,
-    borderColor: '#dee2e6', // Gris claro para el borde
     borderWidth: 1,
-    elevation: 2, // Sombras ligeras para resaltar la tabla
+    elevation: 2,
   },
   tableHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#e9ecef', // Fondo gris claro para encabezados
     padding: 10,
   },
   tableHeaderText: {
-    color: '#495057', // Texto gris oscuro para encabezados
     fontWeight: '600',
     width: '33%',
     textAlign: 'center',
@@ -187,32 +207,27 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#dee2e6', // Línea divisoria entre filas
   },
   tableCell: {
-    color: '#343a40', // Texto oscuro para las celdas
     width: '33%',
     textAlign: 'center',
     fontSize: 14,
   },
   button: {
-    backgroundColor: '#007bff', // Azul moderno para botones
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
   },
   buttonText: {
-    color: '#ffffff', // Blanco para texto en botones
+    color: '#ffffff',
     fontWeight: 'bold',
     fontSize: 14,
   },
   noResultsText: {
     textAlign: 'center',
-    color: '#6c757d', // Texto gris para indicar "sin resultados"
     marginTop: 20,
     fontSize: 16,
   },
 });
-
 
 export default List;

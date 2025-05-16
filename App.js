@@ -5,6 +5,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Toast from 'react-native-toast-message';
+import { useColorScheme } from 'react-native';
+import { lightColors, darkColors } from './theme/colors';
 
 // Pantallas
 import SplashScreen from './screens/SplashScreen';
@@ -14,7 +16,7 @@ import ShowInfo from './screens/ShowInfo';
 import Scanner from './screens/Scanner';
 import Assistences from './screens/Assistences';
 import Register from './screens/Register';
-import Settings from './screens/Settings'; // ⬅️ nueva pantalla de configuración
+import Settings from './screens/Settings';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -31,6 +33,9 @@ function ListStack() {
 
 // Navegación principal de pestañas
 function MyTabs() {
+  const scheme = useColorScheme();
+  const colors = scheme === 'dark' ? darkColors : lightColors;
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -60,21 +65,21 @@ function MyTabs() {
 
           return <Icon name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#007bff',
-        tabBarInactiveTintColor: '#6c757d',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.secondary,
         tabBarStyle: {
-          backgroundColor: '#ffffff',
+          backgroundColor: colors.card,
           borderTopWidth: 1,
-          borderTopColor: '#dee2e6',
+          borderTopColor: colors.border,
           elevation: 2,
         },
         headerStyle: {
-          backgroundColor: '#f8f9fa',
+          backgroundColor: colors.background,
           borderBottomWidth: 1,
-          borderBottomColor: '#dee2e6',
+          borderBottomColor: colors.border,
           elevation: 1,
         },
-        headerTintColor: '#343a40',
+        headerTintColor: colors.text,
       })}
     >
       <Tab.Screen name="Home" component={Home} options={{ title: 'Inicio' }} />

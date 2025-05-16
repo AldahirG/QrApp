@@ -1,15 +1,16 @@
+// sharedStyles.js
 import { StyleSheet } from 'react-native';
 
-export default StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-});
+export const getSharedStyles = (colors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      padding: 16,
+    },
+    title: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+  });
