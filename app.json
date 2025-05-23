@@ -15,13 +15,12 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.aldahirg.QrApp",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/uninterlogoicon.png",
-        "backgroundColor": "#ffffff",
-        "package":"com.aldahirg.QrApp", 
-        "versionCode": 1
-      },
-      "package": "com.aldahirg.QrApp"
+        "backgroundColor": "#ffffff"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"

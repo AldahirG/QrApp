@@ -1,47 +1,53 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ImageBackground, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LottieView from 'lottie-react-native';
 
-export default function SplashScreen({ navigation }) {
+const SplashScreen = ({ navigation }) => {
   useEffect(() => {
-    const cargarYRedirigir = async () => {
-      const evento = await AsyncStorage.getItem('eventoSeleccionado');
+    const checkEvento = async () => {
+      try {
+        const evento = await AsyncStorage.getItem('eventoSeleccionado');
 
-      // Esperamos animación ~2.5s
-      setTimeout(() => {
-        if (evento) {
-          navigation.replace('Main'); // Va a la app principal
-        } else {
-          navigation.replace('Home'); // Va a seleccionar evento
-        }
-      }, 2500);
+        setTimeout(() => {
+          if (evento) {
+            navigation.replace('MainTabs'); // ✅ Va al Home si ya hay evento
+          } else {
+            navigation.replace('Main');     // ✅ Va a seleccionar evento
+          }
+        }, 2500);
+      } catch (error) {
+        console.error('Error al verificar evento:', error);
+        navigation.replace('Main');
+      }
     };
 
-    cargarYRedirigir();
+    checkEvento();
   }, []);
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require('../assets/banner.jpg')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      {/* Animación en pantalla completa */}
       <LottieView
-        source={require('../assets/animations/splash.json')}
+        source={require('../assets/animations/splashscreen.json')}
         autoPlay
         loop={false}
-        style={styles.lottie}
+        style={StyleSheet.absoluteFillObject}
+        resizeMode="cover"
       />
-    </View>
+    </ImageBackground>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
     flex: 1,
-    backgroundColor: '#fff',
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  lottie: {
-    width: 250,
-    height: 250,
   },
 });
+
+export default SplashScreen;

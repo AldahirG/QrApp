@@ -33,9 +33,7 @@ const ShowInfo = ({ route }) => {
   const [nivelEstudios] = useState(data.Nivel_Estudios || "");
   const [nombreInvito, setNombreInvito] = useState(data.Nombre_invito || "");
   const [escProc, setEscProc] = useState(data.escProc || "");
-  const [programaInteres, setProgramaInteres] = useState(
-    data.programaInteres || ""
-  );
+  const [programaInteres, setProgramaInteres] = useState(data.programaInteres || "");
   const [asistio, setAsistio] = useState(data.asistio || "NO");
   const [errores, setErrores] = useState({});
 
@@ -48,18 +46,18 @@ const ShowInfo = ({ route }) => {
 
       const newErrors = {};
       if (!nombre.trim()) newErrors.nombre = true;
-      if (!correo.trim()) newErrors.correo = true;
       if (!telefono.trim()) newErrors.telefono = true;
-      if (!programaInteres.trim()) newErrors.programaInteres = true;
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(correo.trim())) {
-        newErrors.correo = true;
-        Toast.show({
-          type: "error",
-          text1: "Correo inválido",
-          text2: "Introduce un correo válido.",
-        });
+      if (correo.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(correo.trim())) {
+          newErrors.correo = true;
+          Toast.show({
+            type: "error",
+            text1: "Correo inválido",
+            text2: "Introduce un correo válido.",
+          });
+        }
       }
 
       if (Object.keys(newErrors).length > 0) {
@@ -67,15 +65,13 @@ const ShowInfo = ({ route }) => {
         Toast.show({
           type: "error",
           text1: "Faltan campos obligatorios",
-          text2: "Por favor completa los campos requeridos.",
+          text2: "Nombre y teléfono son requeridos.",
         });
         return;
       }
 
       const response = await fetch(
-        `${BASE_URL}/api/registros/update/${
-          data.idregistro_conferencias
-        }?conferencista=${encodeURIComponent(conferencista)}`,
+       `${BASE_URL}/api/registros/${data.idregistro_conferencias}?conferencista=${encodeURIComponent(conferencista)}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -117,6 +113,7 @@ const ShowInfo = ({ route }) => {
       from={{ opacity: 0, translateY: 20 }}
       animate={{ opacity: 1, translateY: 0 }}
       transition={{ delay: index * 80, type: "timing" }}
+      key={index}
     >
       {child}
     </MotiView>
@@ -128,25 +125,15 @@ const ShowInfo = ({ route }) => {
       style={styles.background}
     >
       <ScrollView
-        contentContainerStyle={[
-          styles.container,
-          { backgroundColor: colors.background },
-        ]}
+        contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}
       >
-        <MotiView
-          from={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 100 }}
-        >
+        <MotiView from={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 100 }}>
           <Text style={[styles.header, { color: colors.primary }]}>
             Información de Registro
           </Text>
         </MotiView>
 
-        {animatedInput(
-          <InfoBox label="Nombre" value={nombre} editable={false} />,
-          0
-        )}
+        {animatedInput(<InfoBox label="Nombre" value={nombre} editable={false} />, 0)}
         {animatedInput(
           <InfoBox
             label="Correo"
@@ -165,14 +152,7 @@ const ShowInfo = ({ route }) => {
           />,
           2
         )}
-        {animatedInput(
-          <InfoBox
-            label="Nivel de Estudios"
-            value={nivelEstudios}
-            editable={false}
-          />,
-          3
-        )}
+        {animatedInput(<InfoBox label="Nivel de Estudios" value={nivelEstudios} editable={false} />, 3)}
         {animatedInput(
           <InfoBox
             label="Escuela de Procedencia"
@@ -186,33 +166,17 @@ const ShowInfo = ({ route }) => {
             label="Programa de Interés"
             value={programaInteres}
             onChangeText={setProgramaInteres}
-            error={errores.programaInteres}
           />,
           5
         )}
 
         {animatedInput(
           <>
-            <Text style={[styles.label, { color: colors.text }]}>
-              ¿Quién te invitó?
-            </Text>
-            <View
-              style={[
-                styles.pickerContainer,
-                { borderColor: colors.border, backgroundColor: colors.card },
-              ]}
-            >
-              <Picker
-                selectedValue={nombreInvito}
-                onValueChange={setNombreInvito}
-                style={{ color: colors.text }}
-              >
+            <Text style={[styles.label, { color: colors.text }]}>¿Quién te invitó?</Text>
+            <View style={[styles.pickerContainer, { borderColor: colors.border, backgroundColor: colors.card }]}>
+              <Picker selectedValue={nombreInvito} onValueChange={setNombreInvito} style={{ color: colors.text }}>
                 {opcionesInvito.map((item) => (
-                  <Picker.Item
-                    key={item.value}
-                    label={item.label}
-                    value={item.value}
-                  />
+                  <Picker.Item key={item.value} label={item.label} value={item.value} />
                 ))}
               </Picker>
             </View>
@@ -222,20 +186,9 @@ const ShowInfo = ({ route }) => {
 
         {animatedInput(
           <>
-            <Text style={[styles.label, { color: colors.text }]}>
-              ¿Asistió?
-            </Text>
-            <View
-              style={[
-                styles.pickerContainer,
-                { borderColor: colors.border, backgroundColor: colors.card },
-              ]}
-            >
-              <Picker
-                selectedValue={asistio}
-                onValueChange={setAsistio}
-                style={{ color: colors.text }}
-              >
+            <Text style={[styles.label, { color: colors.text }]}>¿Asistió?</Text>
+            <View style={[styles.pickerContainer, { borderColor: colors.border, backgroundColor: colors.card }]}>
+              <Picker selectedValue={asistio} onValueChange={setAsistio} style={{ color: colors.text }}>
                 <Picker.Item label="SI" value="SI" />
                 <Picker.Item label="NO" value="NO" />
               </Picker>
@@ -246,10 +199,7 @@ const ShowInfo = ({ route }) => {
 
         {animatedInput(
           <TouchableOpacity
-            style={[
-              styles.button,
-              { backgroundColor: loading ? colors.disabled : colors.primary },
-            ]}
+            style={[styles.button, { backgroundColor: loading ? colors.disabled : colors.primary }]}
             onPress={confirmAttendance}
             disabled={loading}
           >
@@ -257,12 +207,7 @@ const ShowInfo = ({ route }) => {
               <ActivityIndicator color="#fff" />
             ) : (
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Icon
-                  name="check"
-                  size={18}
-                  color="#fff"
-                  style={{ marginRight: 5 }}
-                />
+                <Icon name="check" size={18} color="#fff" style={{ marginRight: 5 }} />
                 <Text style={styles.buttonText}>Confirmar asistencia</Text>
               </View>
             )}
@@ -273,7 +218,7 @@ const ShowInfo = ({ route }) => {
         {animatedInput(
           <TouchableOpacity
             style={[styles.cancelButton, { backgroundColor: colors.error }]}
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("List")}
           >
             <Text style={styles.buttonText}>Cancelar</Text>
           </TouchableOpacity>,
@@ -284,13 +229,7 @@ const ShowInfo = ({ route }) => {
   );
 };
 
-const InfoBox = ({
-  label,
-  value,
-  onChangeText,
-  editable = true,
-  error = false,
-}) => {
+const InfoBox = ({ label, value, onChangeText, editable = true, error = false }) => {
   const colors = useThemeColors();
   return (
     <View style={styles.infoBox}>
@@ -313,16 +252,29 @@ const InfoBox = ({
 };
 
 const styles = StyleSheet.create({
-  background: { flex: 1, justifyContent: "center" },
-  container: { flexGrow: 1, padding: 20, width: "100%" },
+  background: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    width: "100%",
+  },
   header: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 20,
   },
-  infoBox: { marginBottom: 12 },
-  label: { fontSize: 15, fontWeight: "bold", marginBottom: 5 },
+  infoBox: {
+    marginBottom: 12,
+  },
+  label: {
+    fontSize: 15,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
   input: {
     height: 40,
     borderWidth: 1,
@@ -337,14 +289,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 12,
   },
-  button: { marginTop: 20, padding: 15, borderRadius: 8, alignItems: "center" },
+  button: {
+    marginTop: 20,
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+  },
   cancelButton: {
     marginTop: 10,
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
   },
-  buttonText: { color: "#ffffff", fontSize: 16, fontWeight: "bold" },
+  buttonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 });
 
 export default ShowInfo;

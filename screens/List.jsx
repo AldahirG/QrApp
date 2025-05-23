@@ -18,16 +18,16 @@ import { useThemeColors } from '../theme/colors';
 const List = () => {
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState([]);
-  const [showResults, setShowResults] = useState(false);
   const navigation = useNavigation();
   const colors = useThemeColors();
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   const normalizeText = (text) => {
     return text
-      ? text
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .toLowerCase()
+      ? text.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
       : '';
   };
 
@@ -49,11 +49,6 @@ const List = () => {
     }
   };
 
-  const handleSearch = () => {
-    fetchUsers();
-    setShowResults(true);
-  };
-
   const filteredUsers = users.filter((user) =>
     normalizeText(user?.nombre).includes(normalizeText(search))
   );
@@ -66,15 +61,7 @@ const List = () => {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={[styles.header, { color: colors.text }]}>Registros</Text>
 
-        <View
-          style={[
-            styles.searchContainer,
-            {
-              backgroundColor: colors.card,
-              borderColor: colors.border,
-            },
-          ]}
-        >
+        <View style={[styles.searchContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Ionicons name="search" size={20} color={colors.mutedText} />
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
@@ -87,54 +74,30 @@ const List = () => {
 
         <TouchableOpacity
           style={[styles.searchButton, { backgroundColor: colors.primary }]}
-          onPress={handleSearch}
+          onPress={fetchUsers}
         >
           <Text style={styles.searchButtonText}>Buscar</Text>
         </TouchableOpacity>
 
-        {showResults && (
-          filteredUsers.length > 0 ? (
-            <View
-              style={[
-                styles.tableContainer,
-                {
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                },
-              ]}
+        {filteredUsers.length > 0 ? (
+          filteredUsers.map((user) => (
+            <TouchableOpacity
+              key={user.idregistro_conferencias}
+              style={[styles.userCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+              onPress={() => navigation.navigate('ShowInfo', { data: user })}
             >
-              <View
-                style={[styles.tableHeader, { backgroundColor: colors.header }]}
-              >
-                <Text style={[styles.tableHeaderText, { color: colors.text }]}>Nombre</Text>
-                <Text style={[styles.tableHeaderText, { color: colors.text }]}>Teléfono</Text>
-                <Text style={[styles.tableHeaderText, { color: colors.text }]}>Acciones</Text>
-              </View>
-              {filteredUsers.map((user) => (
-                <View
-                  key={user.idregistro_conferencias}
-                  style={[styles.tableRow, { borderBottomColor: colors.border }]}
-                >
-                  <Text style={[styles.tableCell, { color: colors.text }]}>
-                    {user?.nombre || 'Sin nombre'}
-                  </Text>
-                  <Text style={[styles.tableCell, { color: colors.text }]}>
-                    {user?.telefono || 'Sin teléfono'}
-                  </Text>
-                  <TouchableOpacity
-                    style={[styles.button, { backgroundColor: colors.primary }]}
-                    onPress={() => navigation.navigate('ShowInfo', { data: user })}
-                  >
-                    <Text style={styles.buttonText}>Ver</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
-          ) : (
-            <Text style={[styles.noResultsText, { color: colors.mutedText }]}>
-              No se encontraron usuarios
-            </Text>
-          )
+              <Text style={[styles.userName, { color: colors.text }]}>
+                {user?.nombre?.trim() || 'Sin nombre'}
+              </Text>
+              <Text style={[styles.userDetails, { color: colors.mutedText }]}>
+                {user?.telefono || 'Sin teléfono'} • {user?.correo?.toLowerCase() || 'Sin correo'}
+              </Text>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text style={[styles.noResultsText, { color: colors.mutedText }]}>
+            No se encontraron usuarios
+          </Text>
         )}
       </ScrollView>
     </ImageBackground>
@@ -144,89 +107,58 @@ const List = () => {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    justifyContent: 'center',
   },
   container: {
-    flexGrow: 1,
     padding: 20,
-    width: '100%',
   },
   header: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
+    marginBottom: 15,
     textAlign: 'center',
-    marginBottom: 20,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 30,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginBottom: 20,
+    paddingHorizontal: 12,
+    borderRadius: 8,
     borderWidth: 1,
-    elevation: 1,
+    marginBottom: 12,
   },
   searchInput: {
     flex: 1,
     height: 40,
-    marginLeft: 10,
-    fontSize: 16,
+    marginLeft: 8,
+    fontSize: 14,
   },
   searchButton: {
-    padding: 15,
+    padding: 12,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 20,
   },
   searchButtonText: {
-    color: '#ffffff',
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  userCard: {
+    padding: 15,
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  userName: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  tableContainer: {
-    borderRadius: 10,
-    overflow: 'hidden',
-    marginBottom: 20,
-    borderWidth: 1,
-    elevation: 2,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 10,
-  },
-  tableHeaderText: {
-    fontWeight: '600',
-    width: '33%',
-    textAlign: 'center',
+  userDetails: {
     fontSize: 14,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 10,
-    borderBottomWidth: 1,
-  },
-  tableCell: {
-    width: '33%',
-    textAlign: 'center',
-    fontSize: 14,
-  },
-  button: {
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontWeight: 'bold',
-    fontSize: 14,
+    marginTop: 4,
   },
   noResultsText: {
     textAlign: 'center',
-    marginTop: 20,
     fontSize: 16,
+    marginTop: 20,
   },
 });
 

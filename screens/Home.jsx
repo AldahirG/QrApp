@@ -1,99 +1,61 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, Alert } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import moment from 'moment';
-
-import { BASE_URL } from '../config';
-import { setEventoSeleccionado } from '../utils/storage';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import LottieView from 'lottie-react-native';
 import { useThemeColors } from '../theme/colors';
 
-import Loader from '../components/Loader';
-import CustomButton from '../components/CustomButton';
-import EmptyState from '../components/EmptyState';
-
-export default function Home({ navigation }) {
-  const [mes] = useState(moment().format('YYYY-MM'));
-  const [eventos, setEventos] = useState([]);
-  const [conferencista, setConferencista] = useState('');
-  const [loading, setLoading] = useState(true);
-
+const Home = () => {
+  const [evento, setEvento] = useState('');
   const colors = useThemeColors();
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/registros/eventos/por-mes?mes=${mes}`)
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setEventos(data);
-          setConferencista(data[0].Conferencista);
-        } else {
-          setEventos([]);
-        }
-      })
-      .catch(() => {
-        Alert.alert('Error', 'No se pudo cargar la lista de eventos');
-      })
-      .finally(() => setLoading(false));
+    const cargarEvento = async () => {
+      const valor = await AsyncStorage.getItem('eventoSeleccionado');
+      if (valor) setEvento(valor);
+    };
+
+    cargarEvento();
   }, []);
-
-  const continuar = async () => {
-    if (!conferencista) {
-      Alert.alert('Debes seleccionar un evento');
-      return;
-    }
-
-    await setEventoSeleccionado(conferencista);
-    navigation.replace('Main');
-  };
-
-  if (loading) return <Loader />;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.text }]}>Selecciona el evento activo</Text>
+      <LottieView
+        source={require('../assets/animations/hi.json')}
+        autoPlay
+        loop={false}
+        style={styles.lottie}
+      />
 
-      {eventos.length === 0 ? (
-        <EmptyState message="No hay eventos disponibles para este mes." />
-      ) : (
-        <Picker
-          selectedValue={conferencista}
-          onValueChange={setConferencista}
-          style={[styles.picker, { color: colors.text, backgroundColor: colors.card }]}
-          dropdownIconColor={colors.text}
-        >
-          {eventos.map((evento, index) => (
-            <Picker.Item
-              key={index}
-              label={evento.Conferencista}
-              value={evento.Conferencista}
-              color={colors.text}
-            />
-          ))}
-        </Picker>
-      )}
-
-      <CustomButton label="Continuar" onPress={continuar} style={styles.button} />
+      <Text style={[styles.title, { color: colors.text }]}>Evento seleccionado:</Text>
+      <Text style={[styles.eventName, { color: colors.primary }]}>"{evento}"</Text>
     </View>
   );
-}
+};
+
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
     justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  picker: {
-    borderRadius: 6,
+  lottie: {
+    width: width * 0.7,
+    height: width * 0.7,
     marginBottom: 30,
   },
-  button: {
-    marginTop: 10,
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  eventName: {
+    fontSize: 18,
+    fontStyle: 'italic',
+    textAlign: 'center',
   },
 });
+
+export default Home;

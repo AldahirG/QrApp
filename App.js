@@ -10,7 +10,8 @@ import { lightColors, darkColors } from './theme/colors';
 
 // Pantallas
 import SplashScreen from './screens/SplashScreen';
-import Home from './screens/Home';
+import Main from './screens/Main'; // Selección de evento
+import Home from './screens/Home'; // Pantalla de bienvenida
 import List from './screens/List';
 import ShowInfo from './screens/ShowInfo';
 import Scanner from './screens/Scanner';
@@ -21,18 +22,16 @@ import Settings from './screens/Settings';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-// Stack interno para la pantalla List + ShowInfo
 function ListStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="List">
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="List" component={List} />
       <Stack.Screen name="ShowInfo" component={ShowInfo} />
     </Stack.Navigator>
   );
 }
 
-// Navegación principal de pestañas
-function MyTabs() {
+function MainTabs() {
   const scheme = useColorScheme();
   const colors = scheme === 'dark' ? darkColors : lightColors;
 
@@ -41,28 +40,15 @@ function MyTabs() {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           let iconName;
-
           switch (route.name) {
-            case 'Home':
-              iconName = 'home';
-              break;
-            case 'ListStack':
-              iconName = 'list';
-              break;
-            case 'Register':
-              iconName = 'person-add';
-              break;
-            case 'Scanner':
-              iconName = 'qr-code-scanner';
-              break;
-            case 'Assistences':
-              iconName = 'content-paste';
-              break;
-            case 'Settings':
-              iconName = 'settings';
-              break;
+            case 'Home': iconName = 'home'; break;
+            case 'ListStack': iconName = 'list'; break;
+            case 'Register': iconName = 'person-add'; break;
+            case 'Scanner': iconName = 'qr-code-scanner'; break;
+            case 'Assistences': iconName = 'content-paste'; break;
+            case 'Settings': iconName = 'settings'; break;
+            default: iconName = 'help';
           }
-
           return <Icon name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: colors.primary,
@@ -92,15 +78,14 @@ function MyTabs() {
   );
 }
 
-// App principal con stack de navegación
 function App() {
   return (
     <>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Splash">
           <Stack.Screen name="Splash" component={SplashScreen} />
-          <Stack.Screen name="Home" component={Home} />
-          <Stack.Screen name="Main" component={MyTabs} />
+          <Stack.Screen name="Main" component={Main} />
+          <Stack.Screen name="MainTabs" component={MainTabs} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast ref={(ref) => Toast.setRef(ref)} />

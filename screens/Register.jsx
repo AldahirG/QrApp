@@ -8,6 +8,7 @@ import {
   ScrollView,
   Image,
   ImageBackground,
+  ActivityIndicator,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,9 +19,15 @@ import moment from "moment";
 import { getProgramOptions } from "../constants/programasPorNivel";
 import { opcionesInvito } from "../constants/opcionesInvito";
 import { getEventoSeleccionado } from "../utils/storage";
-import { FadeInUp, MotiView } from "moti";
+import { MotiView } from "moti";
+import LottieView from "lottie-react-native";
+
+const removeAccents = (str) =>
+  str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
 const Register = () => {
+  const navigation = useNavigation();
+
   const [nombre, setNombre] = useState("");
   const [correo, setCorreo] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -31,24 +38,29 @@ const Register = () => {
   const [escProc, setEscProc] = useState("");
   const [nivelUninter, setNivelUninter] = useState("");
   const [programaInteres, setProgramaInteres] = useState("");
-  const [asistio, setAsistio] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigation = useNavigation();
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const [errores, setErrores] = useState({});
+
+  const validar = () => {
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!correo.trim() || !emailRegex.test(correo)) newErrors.correo = true;
+    if (!telefono.trim() || telefono.length !== 10) newErrors.telefono = true;
+    if (!nombre.trim()) newErrors.nombre = true;
+    return newErrors;
+  };
 
   const handleSubmit = async () => {
-    if (
-      !nombre ||
-      !correo ||
-      !telefono ||
-      !nivelEstudios ||
-      !nombreInvito ||
-      !alumno ||
-      !asistio
-    ) {
+    const newErrors = validar();
+    setErrores(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: "Por favor, completa todos los campos obligatorios.",
+        text1: "Campos inválidos",
+        text2: "Revisa los campos marcados.",
       });
       return;
     }
@@ -59,7 +71,7 @@ const Register = () => {
       if (!conferencista) throw new Error("No hay evento seleccionado.");
 
       const payload = {
-        nombre: nombre.trim(),
+        nombre: removeAccents(nombre.trim().toUpperCase()),
         correo: correo.trim().toLowerCase(),
         telefono: telefono.trim(),
         Nivel_Estudios: nivelEstudios,
@@ -68,10 +80,10 @@ const Register = () => {
         fecha_registro: moment().toISOString(),
         alumno,
         tipo,
-        escProc,
+        escProc: removeAccents(escProc.trim().toUpperCase()),
         NivelUninter: nivelUninter,
         programaInteres,
-        asistio,
+        asistio: "SI",
       };
 
       const response = await fetch(
@@ -85,32 +97,39 @@ const Register = () => {
         }
       );
 
-      const result = await response.json();
-
       if (response.ok) {
-        Toast.show({ type: "success", text1: "Registro creado exitosamente" });
-        // Limpiar campos
-        setNombre("");
-        setCorreo("");
-        setTelefono("");
-        setNivelEstudios("");
-        setNombreInvito("");
-        setAlumno("");
-        setEscProc("");
-        setNivelUninter("");
-        setProgramaInteres("");
-        setAsistio("");
-        setTimeout(() => navigation.navigate("Home"), 2000);
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+          limpiarCampos();
+          navigation.navigate("Home");
+        }, 2000);
       } else {
-        alert("Error al crear el registro");
-        console.error("Servidor:", result);
+        Toast.show({ type: "error", text1: "Error al crear el registro" });
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error en la solicitud");
+      Toast.show({ type: "error", text1: "Error en la solicitud" });
     } finally {
       setLoading(false);
     }
+  };
+
+  const limpiarCampos = () => {
+    setNombre("");
+    setCorreo("");
+    setTelefono("");
+    setNivelEstudios("");
+    setNombreInvito("");
+    setAlumno("");
+    setEscProc("");
+    setNivelUninter("");
+    setProgramaInteres("");
+  };
+
+  const cancelarRegistro = () => {
+    limpiarCampos();
+    navigation.navigate("Home");
   };
 
   return (
@@ -119,148 +138,159 @@ const Register = () => {
       style={styles.background}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <MotiView
-          from={{ opacity: 0, translateY: -20 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: "timing", duration: 800 }}
-        >
-          <Image
-            source={require("../assets/uninterlogo.png")}
-            style={styles.logo}
+        {showSuccess ? (
+          <LottieView
+            source={require("../assets/animations/success.json")}
+            autoPlay
+            loop={false}
+            style={{ width: 200, height: 200, alignSelf: "center" }}
           />
-          <Text style={styles.header}>Nuevo Registro</Text>
-        </MotiView>
+          
+        ) : (
+          <>
+            <Image
+              source={require("../assets/uninterlogo.png")}
+              style={styles.logo}
+            />
+            <Text style={styles.header}>Nuevo Registro</Text>
 
-        {[
-          // Animación en cascada
-          ["Nombre", nombre, setNombre, "Ingresa el nombre", "default"],
-          ["Correo", correo, setCorreo, "Ingresa el correo", "email-address"],
-          [
-            "Teléfono",
-            telefono,
-            setTelefono,
-            "Ingresa el teléfono",
-            "phone-pad",
-          ],
-        ].map(([label, value, setter, placeholder, keyboardType], index) => (
-          <MotiView
-            key={label}
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ delay: 100 * index }}
-          >
             <View style={styles.infoBox}>
-              <Text style={styles.label}>{label}</Text>
+              <Text style={styles.label}>Nombre</Text>
               <TextInput
-                style={styles.input}
-                value={value}
-                onChangeText={setter}
-                placeholder={placeholder}
-                keyboardType={keyboardType}
-                placeholderTextColor="#bbb"
+                style={[styles.input, errores.nombre && styles.inputError]}
+                value={nombre}
+                onChangeText={(text) =>
+                  setNombre(removeAccents(text).toUpperCase())
+                }
+                placeholder="Nombre completo"
               />
+              {errores.nombre && (
+                <Text style={styles.errorText}>Nombre obligatorio</Text>
+              )}
             </View>
-          </MotiView>
-        ))}
 
-        <MotiView
-          from={{ opacity: 0, translateY: 20 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          transition={{ delay: 300 }}
-        >
-          <View style={styles.infoBox}>
-            <Text style={styles.label}>Nivel de Estudios</Text>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={nivelEstudios}
-                onValueChange={(itemValue) => {
-                  setNivelEstudios(itemValue);
-                  setProgramaInteres("");
-                }}
-                style={styles.input}
-              >
-                <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
-                <Picker.Item label="SECUNDARIA" value="SECUNDARIA" />
-                <Picker.Item label="BACHILLERATO" value="BACHILLERATO" />
-                <Picker.Item label="UNIVERSIDAD" value="UNIVERSIDAD" />
-                <Picker.Item label="POSGRADO" value="POSGRADO" />
-              </Picker>
-            </View>
-          </View>
-        </MotiView>
-
-        {nivelEstudios !== "" && (
-          <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ delay: 400 }}
-          >
             <View style={styles.infoBox}>
-              <Text style={styles.label}>Programa de Interés</Text>
+              <Text style={styles.label}>Correo</Text>
+              <TextInput
+                style={[styles.input, errores.correo && styles.inputError]}
+                value={correo}
+                onChangeText={setCorreo}
+                placeholder="Correo electrónico"
+                keyboardType="email-address"
+              />
+              {errores.correo && (
+                <Text style={styles.errorText}>Correo inválido</Text>
+              )}
+            </View>
+
+            <View style={styles.infoBox}>
+              <Text style={styles.label}>Teléfono</Text>
+              <TextInput
+                style={[styles.input, errores.telefono && styles.inputError]}
+                value={telefono}
+                onChangeText={(text) =>
+                  setTelefono(text.replace(/[^0-9]/g, "").slice(0, 10))
+                }
+                keyboardType="phone-pad"
+                placeholder="10 dígitos"
+              />
+              {errores.telefono && (
+                <Text style={styles.errorText}>Teléfono inválido</Text>
+              )}
+            </View>
+
+            <View style={styles.infoBox}>
+              <Text style={styles.label}>Nivel de Estudios</Text>
               <View style={styles.pickerContainer}>
                 <Picker
-                  selectedValue={programaInteres}
-                  onValueChange={setProgramaInteres}
-                  style={styles.input}
+                  selectedValue={nivelEstudios}
+                  onValueChange={(itemValue) => {
+                    setNivelEstudios(itemValue);
+                    setProgramaInteres("");
+                  }}
                 >
                   <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
-                  {getProgramOptions(nivelEstudios).map((option) => (
-                    <Picker.Item key={option} label={option} value={option} />
+                  <Picker.Item label="SECUNDARIA" value="SECUNDARIA" />
+                  <Picker.Item label="BACHILLERATO" value="BACHILLERATO" />
+                  <Picker.Item label="UNIVERSIDAD" value="UNIVERSIDAD" />
+                  <Picker.Item label="POSGRADO" value="POSGRADO" />
+                </Picker>
+              </View>
+            </View>
+
+            {nivelEstudios !== "" && (
+              <View style={styles.infoBox}>
+                <Text style={styles.label}>Programa de Interés</Text>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={programaInteres}
+                    onValueChange={setProgramaInteres}
+                  >
+                    <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
+                    {getProgramOptions(nivelEstudios).map((option) => (
+                      <Picker.Item key={option} label={option} value={option} />
+                    ))}
+                  </Picker>
+                </View>
+              </View>
+            )}
+
+            <View style={styles.infoBox}>
+              <Text style={styles.label}>Escuela de Procedencia</Text>
+              <TextInput
+                style={styles.input}
+                value={escProc}
+                onChangeText={(text) =>
+                  setEscProc(removeAccents(text).toUpperCase())
+                }
+              />
+            </View>
+
+            <View style={styles.infoBox}>
+              <Text style={styles.label}>¿Eres alumno Uninter?</Text>
+              <View style={styles.pickerContainer}>
+                <Picker selectedValue={alumno} onValueChange={setAlumno}>
+                  <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
+                  <Picker.Item label="SI" value="SI" />
+                  <Picker.Item label="NO" value="NO" />
+                </Picker>
+              </View>
+            </View>
+
+            <View style={styles.infoBox}>
+              <Text style={styles.label}>¿Quién te invitó?</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={nombreInvito}
+                  onValueChange={setNombreInvito}
+                >
+                  <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
+                  {opcionesInvito.map(({ label, value }) => (
+                    <Picker.Item key={value} label={label} value={value} />
                   ))}
                 </Picker>
               </View>
             </View>
-          </MotiView>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleSubmit}
+              disabled={loading}
+            >
+              <Text style={styles.buttonText}>
+                {loading ? "Registrando..." : "Registrar"}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: "#6c757d" }]}
+              onPress={cancelarRegistro}
+              disabled={loading}
+            >
+              <Text style={styles.buttonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </>
         )}
-
-        {[
-          ["Escuela de Procedencia", escProc, setEscProc],
-          ["¿Eres alumno Uninter?", alumno, setAlumno, ["SI", "NO"]],
-          ["¿Asistirás al evento?", asistio, setAsistio, ["SI", "NO"]],
-          [
-            "¿Quién te invitó?",
-            nombreInvito,
-            setNombreInvito,
-            opcionesInvito.map((o) => o.label),
-          ],
-        ].map(([label, value, setter, opciones], idx) => (
-          <MotiView
-            key={label}
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ delay: 500 + idx * 100 }}
-          >
-            <View style={styles.infoBox}>
-              <Text style={styles.label}>{label}</Text>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={value}
-                  onValueChange={setter}
-                  style={styles.input}
-                >
-                  <Picker.Item label="SELECCIONA UNA OPCIÓN" value="" />
-                  {Array.isArray(opciones)
-                    ? opciones.map((op) => (
-                        <Picker.Item key={op} label={op} value={op} />
-                      ))
-                    : opcionesInvito.map(({ label, value }) => (
-                        <Picker.Item key={value} label={label} value={value} />
-                      ))}
-                </Picker>
-              </View>
-            </View>
-          </MotiView>
-        ))}
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleSubmit}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? "Registrando..." : "Registrar"}
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
     </ImageBackground>
   );
@@ -297,6 +327,14 @@ const styles = StyleSheet.create({
     color: "#343a40",
     fontSize: 14,
   },
+  inputError: {
+    borderColor: "#dc3545",
+  },
+  errorText: {
+    color: "#dc3545",
+    fontSize: 12,
+    marginTop: 2,
+  },
   pickerContainer: {
     borderWidth: 0,
     borderRadius: 8,
@@ -307,7 +345,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   button: {
-    marginTop: 20,
+    marginTop: 15,
     backgroundColor: "#007bff",
     padding: 15,
     borderRadius: 8,
